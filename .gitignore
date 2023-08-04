@@ -1,0 +1,15 @@
+.idea
+.vscode
+.xmake
+.git
+
+bin
+
+build
+
+lib
+
+logs
+
+misc
+

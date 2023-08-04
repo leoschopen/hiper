@@ -1,0 +1,8 @@
+锁
+一万线程测试1000加法，单位ms
+hiper::SpinLock::Lock lock(spin_mutex); 418
+std::lock_guard<hiper::SpinLock> lock(spin_mutex); 395
+std::lock_guard<std::mutex> lock(mutex); 5115
+hiper::CASLock::Lock lock(cas_mutex); 913
+std::atomic<int> count = 0; 376
+std::unique_lock<std::shared_mutex> lock(shared_mutex); 过久,提供了更多的控制锁的行为，比如锁超时、不锁定、条件变量等
