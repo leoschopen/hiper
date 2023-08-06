@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-29 22:53:05
- * @LastEditTime: 2023-07-30 19:33:48
+ * @LastEditTime: 2023-08-06 10:36:49
  * @Description: 工具类
  */
 
@@ -43,6 +43,9 @@ const char *TypeToName() {
     return s_name;
 }
 
+void Backtrace(std::vector<std::string> &bt, int size = 64, int skip = 1);
+
+std::string BacktraceToString(int size = 64, int skip = 2, const std::string &prefix = "    ");
 
 
 /**

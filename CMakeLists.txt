@@ -4,7 +4,7 @@ project(hiper)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++17 -O0 -ggdb")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++17 -rdynamic -g -O0 -ggdb")
 
 #add_compile_options(-fstandalone-debug)
 #message(STATUS "optional: -fstandalone-debug")
@@ -27,7 +27,7 @@ set(LIB_SRC
 
 set(LIB_LIST pthread yaml-cpp)
 
-add_library(hiper STATIC ${LIB_SRC})
+add_library(hiper SHARED ${LIB_SRC})
 target_link_libraries(hiper "${LIB_LIST}")
 
 

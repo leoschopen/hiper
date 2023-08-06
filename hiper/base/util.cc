@@ -1,11 +1,13 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-29 22:53:14
- * @LastEditTime: 2023-07-30 11:53:21
+ * @LastEditTime: 2023-08-06 11:04:02
  * @Description: utils
  */
 
 #include "util.h"
+#include "log.h"
+#include <cstddef>
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
@@ -17,8 +19,12 @@
 #include <cxxabi.h>   // for abi::__cxa_demangle()
 #include <algorithm>  // for std::transform()
 #include <fstream>
+#include <vector>
+#include <dlfcn.h>
 
 namespace hiper {
+
+hiper::Logger::ptr g_logger = LOG_NAME("system");
 
 pid_t GetThreadId()
 {
@@ -244,6 +250,34 @@ bool FSUtil::OpenForWrite(std::ofstream &ofs, const std::string &filename, std::
         ofs.open(filename.c_str(), mode);
     }
     return ofs.is_open();
+}
+
+
+// 获取程序的回溯信息（backtrace）并将其转换为字符串形式
+void Backtrace(std::vector<std::string> &bt, int size, int skip){
+    // void **array = (void **)malloc(sizeof(void *) * size);
+    void **array = new void*[size]; // 不能太大，否则会造成协程的栈溢出
+    size_t s = ::backtrace(array, size);
+    char **strings = ::backtrace_symbols(array, s);
+    if (strings == nullptr) {
+        LOG_ERROR(g_logger) << "backtrace_symbols error";
+        return;
+    }
+    for (size_t i = skip; i < s; ++i) {
+        bt.push_back(strings[i]);
+    }
+    free(strings);
+    free(array);
+}
+
+std::string BacktraceToString(int size, int skip, const std::string &prefix){
+    std::vector<std::string> bt;
+    Backtrace(bt,size,skip);
+    std::stringstream ss;
+    for (size_t i = 0; i < bt.size(); ++i) {
+        ss << prefix << bt[i] << std::endl;
+    }
+    return ss.str();
 }
 
 
