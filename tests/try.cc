@@ -1,40 +1,32 @@
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-
+#include <cstdio>
 #include <iostream>
+#include <memory>
+#include <string>
 
-// #define USE_JEMALLOC
+class Example {
+public:
+    Example(int value) : data(value) {}
 
-#ifdef USE_JEMALLOC
-#include <jemalloc/jemalloc.h>
-#endif
+    void printData() {
+        std::cout << "Data: " << data << std::endl;
+    }
 
+private:
+    int data;
+};
 
-#define MALLOC_CNT 10000000
-
-long long mstime() {
-    long long mst;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    mst = ((long long)tv.tv_sec) * 1000;
-    mst += tv.tv_usec / 1000;
-    return mst;
+std::unique_ptr<Example> createExample(int value) {
+    return std::make_unique<Example>(value);
 }
 
 int main() {
-    srand((unsigned)time(NULL));
-    long long begin = mstime();
-    for (int i = 0; i < MALLOC_CNT; i++) {
-        int size = 10 * 4 + rand() % 1024;
-        char* p = (char*)malloc(size);
-        memset(p, rand() % 128, size);
-        free(p);
-    }
-    long long end = mstime();
+    // std::unique_ptr<Example> ptr = createExample(42);
+    // ptr->printData(); // 安全地访问对象
 
-    std::cout << "begin: " << begin << std::endl
-              << "end: " << end << std::endl
-              << "val: " << end - begin << std::endl;
+    // char * a = "123";
+    std::string a = "123";
+    auto p1 = std::make_shared<std::string>(a);
+    printf("%s\n", p1->c_str());
+
     return 0;
 }

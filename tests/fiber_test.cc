@@ -12,10 +12,10 @@ void run_in_fiber() {
 void test_fiber() {
     LOG_INFO(g_logger) << "main begin -1";
     {
-        hiper::Fiber::GetThis();
+        hiper::Fiber::GetThis(); // create main fiber
         LOG_INFO(g_logger) << "main begin";
-        hiper::Fiber::ptr fiber(new hiper::Fiber(run_in_fiber));
-        fiber->swapIn();
+        hiper::Fiber::ptr fiber(new hiper::Fiber(run_in_fiber)); // sub fiber
+        fiber->swapIn(); // hold main fiber and exec sub fiber
         LOG_INFO(g_logger) << "main after swapIn";
         fiber->swapIn();
         LOG_INFO(g_logger) << "main after end";
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     hiper::Thread::SetName("main");
 
     std::vector<hiper::Thread::ptr> thrs;
-    for(int i = 0; i < 3; ++i) {
+    for(int i = 0; i < 3; ++i) { 
         thrs.push_back(hiper::Thread::ptr(
                     new hiper::Thread(&test_fiber, "name_" + std::to_string(i))));
     }

@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:33:13
- * @LastEditTime: 2023-08-23 12:21:32
+ * @LastEditTime: 2023-08-23 22:40:39
  * @Description: fiber implementation
  */
 
@@ -11,6 +11,7 @@
 #include "log.h"
 #include "macro.h"
 
+#include <cstdio>
 #include <mimalloc-2.1/mimalloc.h>
 // #include <mimalloc-2.1/mimalloc-new-delete.h>
 #include "config.h"
@@ -143,26 +144,29 @@ void Fiber::swapIn()
     // if (swapcontext(&Scheduler::GetMainFiber()->ctx_, &ctx_)) {
     //     HIPER_ASSERT2(false, "swapcontext");
     // }
-    if(swapcontext(&t_threadFiber->ctx_, &ctx_)) {
+    if (swapcontext(&t_threadFiber->ctx_, &ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
 
 // 将当前协程切换到后台
-void Fiber::swapOut() {
+void Fiber::swapOut()
+{
     SetThis(t_threadFiber.get());
-    if(swapcontext(&ctx_, &t_threadFiber->ctx_)) {
+    if (swapcontext(&ctx_, &t_threadFiber->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
 
-void Fiber::SetThis(Fiber* f) {
+void Fiber::SetThis(Fiber* f)
+{
     t_fiber = f;
 }
 
 // 返回当前协程
-Fiber::ptr Fiber::GetThis() {
-    if(t_fiber) {
+Fiber::ptr Fiber::GetThis()
+{
+    if (t_fiber) {
         return t_fiber->shared_from_this();
     }
     Fiber::ptr main_fiber(new Fiber);
@@ -171,47 +175,53 @@ Fiber::ptr Fiber::GetThis() {
     return t_fiber->shared_from_this();
 }
 
-//协程切换到后台，并且设置为Ready状态
-void Fiber::YieldToReady() {
+// 协程切换到后台，并且设置为Ready状态
+void Fiber::YieldToReady()
+{
     Fiber::ptr cur = GetThis();
     HIPER_ASSERT(cur->state_ == EXEC);
     cur->state_ = READY;
     cur->swapOut();
 }
 
-//协程切换到后台，并且设置为Hold状态
-void Fiber::YieldToHold() {
+// 协程切换到后台，并且设置为Hold状态
+void Fiber::YieldToHold()
+{
     Fiber::ptr cur = GetThis();
     HIPER_ASSERT(cur->state_ == EXEC);
-    //cur->state_ = HOLD;
+    cur->state_ = HOLD;
     cur->swapOut();
 }
 
-//总协程数
-uint64_t Fiber::TotalFibers() {
+// 总协程数
+uint64_t Fiber::TotalFibers()
+{
     return s_fiber_count;
 }
 
-void Fiber::MainFunc() {
+void Fiber::MainFunc()
+{
     Fiber::ptr cur = GetThis();
     HIPER_ASSERT(cur);
     try {
         cur->cb_();
-        cur->cb_ = nullptr;
+        cur->cb_    = nullptr;
         cur->state_ = TERM;
-    } catch (std::exception& ex) {
+    }
+    catch (std::exception& ex) {
         cur->state_ = EXCEPT;
-        LOG_ERROR(g_logger) << "Fiber Except: " << ex.what()
-            << " fiber_id=" << cur->getId()
-            << std::endl
-            << hiper::BacktraceToString();
-    } catch (...) {
+        LOG_ERROR(g_logger) << "Fiber Except: " << ex.what() << " fiber_id=" << cur->getId()
+                            << std::endl
+                            << hiper::BacktraceToString();
+    }
+    catch (...) {
         cur->state_ = EXCEPT;
         LOG_ERROR(g_logger) << "Fiber Except"
-            << " fiber_id=" << cur->getId()
-            << std::endl
-            << hiper::BacktraceToString();
+                            << " fiber_id=" << cur->getId() << std::endl
+                            << hiper::BacktraceToString();
     }
+
+    // LOG_DEBUG(g_logger) << cur.use_count();  // 2
 
     auto raw_ptr = cur.get();
     cur.reset();
@@ -220,51 +230,54 @@ void Fiber::MainFunc() {
     HIPER_ASSERT2(false, "never reach fiber_id=" + std::to_string(raw_ptr->getId()));
 }
 
-void Fiber::call() {
+void Fiber::call()
+{
     SetThis(this);
     state_ = EXEC;
-    if(swapcontext(&t_threadFiber->ctx_, &ctx_)) {
+    if (swapcontext(&t_threadFiber->ctx_, &ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
 
-void Fiber::back() {
+void Fiber::back()
+{
     SetThis(t_threadFiber.get());
-    if(swapcontext(&ctx_, &t_threadFiber->ctx_)) {
+    if (swapcontext(&ctx_, &t_threadFiber->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
 
-void Fiber::CallerMainFunc() {
+void Fiber::CallerMainFunc()
+{
     Fiber::ptr cur = GetThis();
     HIPER_ASSERT(cur);
     try {
         cur->cb_();
-        cur->cb_ = nullptr;
+        cur->cb_    = nullptr;
         cur->state_ = TERM;
-    } catch (std::exception& ex) {
+    }
+    catch (std::exception& ex) {
         cur->state_ = EXCEPT;
-        LOG_ERROR(g_logger) << "Fiber Except: " << ex.what()
-            << " fiber_id=" << cur->getId()
-            << std::endl
-            << hiper::BacktraceToString();
-    } catch (...) {
+        LOG_ERROR(g_logger) << "Fiber Except: " << ex.what() << " fiber_id=" << cur->getId()
+                            << std::endl
+                            << hiper::BacktraceToString();
+    }
+    catch (...) {
         cur->state_ = EXCEPT;
         LOG_ERROR(g_logger) << "Fiber Except"
-            << " fiber_id=" << cur->getId()
-            << std::endl
-            << hiper::BacktraceToString();
+                            << " fiber_id=" << cur->getId() << std::endl
+                            << hiper::BacktraceToString();
     }
 
     auto raw_ptr = cur.get();
     cur.reset();
     raw_ptr->back();
     HIPER_ASSERT2(false, "never reach fiber_id=" + std::to_string(raw_ptr->getId()));
-
 }
 
-uint64_t Fiber::GetFiberId() {
-    if(t_fiber) {
+uint64_t Fiber::GetFiberId()
+{
+    if (t_fiber) {
         return t_fiber->getId();
     }
     return 0;
