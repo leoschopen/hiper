@@ -4,6 +4,7 @@
 #include "config.h"
 #include "env.h"
 #include "log.h"
+#include "fiber.h"
 #include "util.h"
 #include "mutex.h"
 #include "noncopyable.h"

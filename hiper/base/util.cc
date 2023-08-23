@@ -1,12 +1,13 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-29 22:53:14
- * @LastEditTime: 2023-08-06 11:04:02
+ * @LastEditTime: 2023-08-23 16:52:40
  * @Description: utils
  */
 
 #include "util.h"
 #include "log.h"
+#include "fiber.h"
 #include <cstddef>
 #include <unistd.h>
 #include <string.h>
@@ -38,8 +39,7 @@ uint64_t GetElapsedMS() {
 }
 
 uint64_t GetFiberId() {
-    // TODO:
-    return 0;
+    return hiper::Fiber::GetFiberId();
 }
 
 std::string GetThreadName() {

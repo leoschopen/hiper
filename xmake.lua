@@ -4,12 +4,18 @@ add_rules("mode.debug", "mode.release") -- xmake f -m debug/release来切换编�
 set_languages("cxx17")
 
 add_includedirs("$(projectdir)")
+add_includedirs("/usr/local/include/mimalloc-2.1")
 
 -- 设置默认的输出目录
 set_targetdir("$(projectdir)/bin")
 
 -- Required packages
-add_requires("boost", "yaml-cpp")
+add_requires("boost", "yaml-cpp", "mimalloc", "jemalloc")
+
+-- -- 添加链接库
+-- add_links("mimalloc")
+
+-- add_linkdirs("/usr/local/lib")
 
 -- The default rule
 if is_mode("release") then
@@ -33,8 +39,10 @@ target("hiper")
     set_kind("shared")
     add_files("hiper/base/**.cc")
     add_headerfiles("hiper/base/**.h")
-    add_packages("boost", "yaml-cpp")
+    add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
     add_syslinks("pthread")
+    add_links("mimalloc", "jemalloc")
+    add_linkdirs("/usr/local/lib")
     set_targetdir("$(projectdir)/lib")
 
 
@@ -43,11 +51,13 @@ for _, name in ipairs({"mutex_test",
                         "log_test", 
                         "config_test", 
                         "thread_test", 
-                        "try"}) do
+                        "allocator_test",
+                        "try",
+                        "fiber_test"}) do
     target(name)
     set_kind("binary")
     add_files("tests/" .. name .. ".cc")
-    add_packages("boost", "yaml-cpp")
+    add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
     add_deps("hiper")
     add_syslinks("pthread")
 end
