@@ -23,9 +23,13 @@ set(LIB_SRC
         hiper/base/env.cc
         hiper/base/noncopyable.h
         hiper/base/singleton.h
+        hiper/base/fiber.cc
+        hiper/base/scheduler.cc
+        hiper/base/hiper.h
+        hiper/base/macro.h
         )
 
-set(LIB_LIST pthread yaml-cpp)
+set(LIB_LIST pthread yaml-cpp mimalloc )
 
 add_library(hiper SHARED ${LIB_SRC})
 target_link_libraries(hiper "${LIB_LIST}")
@@ -39,6 +43,9 @@ target_link_libraries(log_test hiper "${LIB_LIST}")
 
 add_executable(config_test "tests/config_test.cc")
 target_link_libraries(config_test hiper "${LIB_LIST}")
+
+add_executable(scheduler_test "tests/scheduler_test.cc")
+target_link_libraries(scheduler_test hiper "${LIB_LIST}")
 
 add_executable(try "tests/try.cc")
 target_link_libraries(try hiper "${LIB_LIST}")

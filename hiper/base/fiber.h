@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:00:51
- * @LastEditTime: 2023-08-23 12:21:21
+ * @LastEditTime: 2023-08-24 17:43:03
  * @Description: 协程
  */
 
@@ -17,6 +17,7 @@
 namespace hiper {
 
 class Fiber : public std::enable_shared_from_this<Fiber> {
+friend class Scheduler;
 public:
     typedef std::shared_ptr<Fiber> ptr;
     enum State

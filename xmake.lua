@@ -52,6 +52,7 @@ for _, name in ipairs({"mutex_test",
                         "config_test", 
                         "thread_test", 
                         "allocator_test",
+                        "scheduler_test",
                         "try",
                         "fiber_test"}) do
     target(name)

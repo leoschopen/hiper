@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:33:13
- * @LastEditTime: 2023-08-23 22:40:39
+ * @LastEditTime: 2023-08-27 12:16:37
  * @Description: fiber implementation
  */
 
@@ -10,6 +10,7 @@
 #include "config.h"
 #include "log.h"
 #include "macro.h"
+#include "scheduler.h"
 
 #include <cstdio>
 #include <mimalloc-2.1/mimalloc.h>
@@ -30,7 +31,7 @@ static std::atomic<uint64_t> s_fiber_id{0};
 static std::atomic<uint64_t> s_fiber_count{0};
 
 static thread_local Fiber*     t_fiber       = nullptr;
-static thread_local Fiber::ptr t_threadFiber = nullptr;
+static thread_local Fiber::ptr t_thread_main_fiber = nullptr;
 
 static thread_local std::string t_fiber_name = "main";
 static ConfigVar<uint32_t>::ptr g_fiber_stack_size =
@@ -141,19 +142,19 @@ void Fiber::swapIn()
     SetThis(this);
     HIPER_ASSERT(state_ != EXEC);
     state_ = EXEC;
-    // if (swapcontext(&Scheduler::GetMainFiber()->ctx_, &ctx_)) {
-    //     HIPER_ASSERT2(false, "swapcontext");
-    // }
-    if (swapcontext(&t_threadFiber->ctx_, &ctx_)) {
+    if (swapcontext(&Scheduler::GetMainFiber()->ctx_, &ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
+    // if (swapcontext(&t_thread_main_fiber->ctx_, &ctx_)) {
+    //     HIPER_ASSERT2(false, "swapcontext");
+    // }
 }
 
 // 将当前协程切换到后台
 void Fiber::swapOut()
 {
-    SetThis(t_threadFiber.get());
-    if (swapcontext(&ctx_, &t_threadFiber->ctx_)) {
+    SetThis(t_thread_main_fiber.get());
+    if (swapcontext(&ctx_, &t_thread_main_fiber->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
@@ -169,9 +170,10 @@ Fiber::ptr Fiber::GetThis()
     if (t_fiber) {
         return t_fiber->shared_from_this();
     }
+    LOG_INFO(g_logger) << "create main fiber";
     Fiber::ptr main_fiber(new Fiber);
     HIPER_ASSERT(t_fiber == main_fiber.get());
-    t_threadFiber = main_fiber;
+    t_thread_main_fiber = main_fiber;
     return t_fiber->shared_from_this();
 }
 
@@ -234,15 +236,15 @@ void Fiber::call()
 {
     SetThis(this);
     state_ = EXEC;
-    if (swapcontext(&t_threadFiber->ctx_, &ctx_)) {
+    if (swapcontext(&t_thread_main_fiber->ctx_, &ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
 
 void Fiber::back()
 {
-    SetThis(t_threadFiber.get());
-    if (swapcontext(&ctx_, &t_threadFiber->ctx_)) {
+    SetThis(t_thread_main_fiber.get());
+    if (swapcontext(&ctx_, &t_thread_main_fiber->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
