@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:33:13
- * @LastEditTime: 2023-08-27 12:16:37
+ * @LastEditTime: 2023-08-28 12:32:55
  * @Description: fiber implementation
  */
 
@@ -154,7 +154,10 @@ void Fiber::swapIn()
 void Fiber::swapOut()
 {
     SetThis(t_thread_main_fiber.get());
-    if (swapcontext(&ctx_, &t_thread_main_fiber->ctx_)) {
+    // if (swapcontext(&ctx_, &t_thread_main_fiber->ctx_)) {
+    //     HIPER_ASSERT2(false, "swapcontext");
+    // }
+    if(swapcontext(&ctx_, &Scheduler::GetMainFiber()->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }
