@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-24 10:54:21
- * @LastEditTime: 2023-08-24 17:48:44
+ * @LastEditTime: 2023-08-28 16:27:50
  * @Description: 协程调度
  */
 
@@ -31,18 +31,18 @@ public:
     /**
      * @brief Construct a new Scheduler object
      *
-     * @param threads 线程池的大小，threads num
-     * @param use_caller 线程是否纳入协程调度器中，作为主线程运行主协程
+     * @param size 线程池的大小，threads num
+     * @param use_cur_thread 线程是否纳入协程调度器中，作为主线程运行主协程
      * @param name 调度器的名称
      */
-    Scheduler(size_t threads = 1, bool use_caller = true, const std::string& name = "");
+    Scheduler(size_t size = 1, bool use_cur_thread = true, const std::string& name = "");
 
     virtual ~Scheduler();
 
     const std::string& getName() const { return name_; }
 
     static Scheduler* GetThis();
-    static Fiber*     GetMainFiber();
+    static Fiber*     GetSchedulerFiber();
 
     void start();
     void stop();
@@ -164,7 +164,7 @@ private:
     MutexType                 mutex_;
     std::vector<Thread::ptr>  threads_;
     std::list<FiberAndThread> fibers_;
-    Fiber::ptr                root_fiber_;   // use_caller为true时有效,调度协程
+    Fiber::ptr                caller_scheduler_fiber_;   // use_caller为true时有效,调度协程
     std::string               name_;        // 调度器名称
 
 protected:
@@ -173,8 +173,8 @@ protected:
     std::atomic<size_t> active_thread_count_ = {0};
     std::atomic<size_t> idle_thread_count_   = {0};
     bool                stopping_            = true;
-    bool                auto_stop_           = false;
-    int                 root_thread_id_         = 0;   // 主线程id
+    bool                auto_stop_           = false; // 方便在内部停止调度器
+    int                 caller_scheduler_thread_id_         = 0;   // 主线程id
 };
 
 class SchedulerSwitcher : public Noncopyable {

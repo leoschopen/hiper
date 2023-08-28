@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:00:51
- * @LastEditTime: 2023-08-24 17:43:03
+ * @LastEditTime: 2023-08-28 20:56:44
  * @Description: 协程
  */
 
@@ -17,7 +17,8 @@
 namespace hiper {
 
 class Fiber : public std::enable_shared_from_this<Fiber> {
-friend class Scheduler;
+    friend class Scheduler;
+
 public:
     typedef std::shared_ptr<Fiber> ptr;
     enum State
@@ -34,17 +35,17 @@ private:
     Fiber();
 
 public:
-    Fiber(std::function<void()> cb, size_t stacksize = 0, bool use_caller = false);
+    Fiber(std::function<void()> cb, size_t stacksize = 0, bool back_to_caller = false);
     ~Fiber();
 
     // 重置协程函数，并重置状态，利用已分配的內存继续使用
     void reset(std::function<void()> cb);
 
     // 切换到当前协程执行
-    void swapIn();
+    void resume();
 
     // 将当前协程切换到后台
-    void swapOut();
+    void yield();
 
     uint64_t getId() const { return id_; }
     State    getState() const { return state_; }
@@ -66,13 +67,6 @@ public:
     // 协程执行函数, 返回到主协程
     static void MainFunc();
 
-    // 协程执行函数, 返回到调用协程
-    static void CallerMainFunc();
-
-    void call();
-
-    void back();
-
     static uint64_t GetFiberId();
 
 private:
@@ -81,6 +75,7 @@ private:
     State      state_     = INIT;
     ucontext_t ctx_;
     void*      stack_ = nullptr;
+    bool       back_to_caller_ = false; // 是否切换到调用者线程中的main协程去还是交由调度器调度
 
     std::function<void()> cb_;
 };

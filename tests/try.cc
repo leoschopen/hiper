@@ -19,6 +19,7 @@ std::unique_ptr<Example> createExample(int value) {
     return std::make_unique<Example>(value);
 }
 
+
 int main() {
     // std::unique_ptr<Example> ptr = createExample(42);
     // ptr->printData(); // 安全地访问对象

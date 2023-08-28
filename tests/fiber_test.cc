@@ -15,11 +15,11 @@ void test_fiber() {
         hiper::Fiber::GetThis(); // create main fiber
         LOG_INFO(g_logger) << "main begin";
         hiper::Fiber::ptr fiber(new hiper::Fiber(run_in_fiber)); // sub fiber
-        fiber->swapIn(); // hold main fiber and exec sub fiber
-        LOG_INFO(g_logger) << "main after swapIn";
-        fiber->swapIn();
+        fiber->resume(); // hold main fiber and exec sub fiber
+        LOG_INFO(g_logger) << "main after resume";
+        fiber->resume();
         LOG_INFO(g_logger) << "main after end";
-        fiber->swapIn();
+        fiber->resume();
     }
     LOG_INFO(g_logger) << "main after end2";
 }

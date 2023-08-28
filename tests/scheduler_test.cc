@@ -14,7 +14,7 @@ void test_fiber() {
 
 int main(int argc, char** argv) {
     LOG_INFO(g_logger) << "main";
-    hiper::Scheduler sc(1, true, "test");
+    hiper::Scheduler sc(1, false, "test");
     sc.start();
     sleep(2);
     LOG_INFO(g_logger) << "schedule";

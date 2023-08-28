@@ -1,51 +1,54 @@
-#include "hiper.h"
 #include "scheduler.h"
+
+#include "hiper.h"
+#include "log.h"
 
 namespace hiper {
 
 static hiper::Logger::ptr g_logger = LOG_NAME("system");
 
-// 当前线程的调度器
-static thread_local Scheduler* t_scheduler       = nullptr; 
+// 当前线程的调度器对象
+static thread_local Scheduler* t_scheduler = nullptr;
 
-// 当前线程的调度协程，每个线程都独有一份
-static thread_local Fiber*     t_scheduler_fiber = nullptr; 
+// 当前线程的调度协程，也是主协程
+static thread_local Fiber* t_scheduler_fiber = nullptr;
 
 
 /**
  * @brief Construct a new Scheduler:: Scheduler object
- * 
- * @param threads 
- * @param use_caller 控制是否使用调用者线程来执行调度器还是创建一个独立的线程来执行调度逻辑
- * @param name 
+ *
+ * @param size
+ * @param use_cur_thread 控制是否使用调用者线程来执行调度器还是创建一个独立的线程来执行调度逻辑
+ * @param name
  */
-Scheduler::Scheduler(size_t threads, bool use_caller, const std::string& name)
+Scheduler::Scheduler(size_t size, bool use_cur_thread, const std::string& name)
     : name_(name)
 {
-    HIPER_ASSERT(threads > 0);
+    HIPER_ASSERT(size > 0);
 
-    if (use_caller) {
+    if (use_cur_thread) {
         hiper::Fiber::GetThis();
 
         // threads只表示额外创建的线程池大小，主协程已经占用了一个线程
-        --threads;
+        --size;
 
         // 确保没有其他调度器存在
         HIPER_ASSERT(GetThis() == nullptr);
 
         t_scheduler = this;
 
-        root_fiber_.reset(new Fiber(std::bind(&Scheduler::run, this), 0, true));
+        caller_scheduler_fiber_.reset(new Fiber(std::bind(&Scheduler::run, this), 0, true));
+
         hiper::Thread::SetName(name_);
 
-        t_scheduler_fiber = root_fiber_.get();
-        root_thread_id_   = hiper::GetThreadId();
-        thread_ids_.push_back(root_thread_id_);
+        t_scheduler_fiber           = caller_scheduler_fiber_.get();
+        caller_scheduler_thread_id_ = hiper::GetThreadId();
+        thread_ids_.push_back(caller_scheduler_thread_id_);
     }
     else {
-        root_thread_id_ = -1;
+        caller_scheduler_thread_id_ = -1;
     }
-    thread_count_ = threads;
+    thread_count_ = size;
 }
 
 Scheduler::~Scheduler()
@@ -56,12 +59,23 @@ Scheduler::~Scheduler()
     }
 }
 
+/**
+ * @brief 获取当前线程的调度器对象
+ *
+ * @return Scheduler*
+ */
 Scheduler* Scheduler::GetThis()
 {
     return t_scheduler;
 }
 
-Fiber* Scheduler::GetMainFiber()
+
+/**
+ * @brief 返回调度器的调度协程
+ *
+ * @return Fiber*
+ */
+Fiber* Scheduler::GetSchedulerFiber()
 {
     return t_scheduler_fiber;
 }
@@ -84,21 +98,16 @@ void Scheduler::start()
         thread_ids_.push_back(threads_[i]->getId());
     }
     lock.unlock();
-
-    // if(root_fiber_) {
-    //     //root_fiber_->swapIn();
-    //     root_fiber_->call();
-    //     HIPER_LOG_INFO(g_logger) << "call out " << root_fiber_->getState();
-    // }
 }
 
 void Scheduler::stop()
 {
-    auto_stop_ = true;
+    auto_stop_ = true;   // 调度器将会执行自动停止操作
 
-    // 检查根协程的状态是否符合停止条件
-    if (root_fiber_ && thread_count_ == 0 &&
-        (root_fiber_->getState() == Fiber::TERM || root_fiber_->getState() == Fiber::INIT)) {
+    // 关闭caller线程中的调度器
+    if (caller_scheduler_fiber_ && thread_count_ == 0 &&
+        (caller_scheduler_fiber_->getState() == Fiber::TERM ||
+         caller_scheduler_fiber_->getState() == Fiber::INIT)) {
         LOG_INFO(g_logger) << this << " stopped";
         stopping_ = true;
 
@@ -108,12 +117,13 @@ void Scheduler::stop()
         }
     }
 
-    // root_thread_id_ 标识调度器是否是在调用者线程中执行还是创建的额外的线程中执行
-    // 如果是在调用者线程中执行 != -1 ，那么执行这个调度器函数所在的线程（协程）一定是调用者线程，在这个调用者线程中执行stop
-    // 反之，如果是在创建的额外线程中执行 == -1 ，那么执行这个调度器函数所在的线程（协程）不一定是调用者线程
+    // caller_scheduler_thread_id_ 标识调度器是否是在调用者线程中执行还是创建的额外的线程中执行
 
-    // 在创建的额外线程中执行的话，没有一个t_scheduler，所以这里的GetThis()一定不是this
-    if (root_thread_id_ != -1) {
+    // TODO: 如何理解
+
+    // 调度器如果是在caller线程中创建的话，只有caller线程才能stop
+    // 调度器在额外线程中创建，并不是当前线程的调度器，所以不能stop
+    if (caller_scheduler_thread_id_ != -1) {
         HIPER_ASSERT(GetThis() == this);
     }
     else {
@@ -125,13 +135,13 @@ void Scheduler::stop()
         tickle();
     }
 
-    if (root_fiber_) {
+    if (caller_scheduler_fiber_) {
         tickle();
     }
 
-    if (root_fiber_) {
+    if (caller_scheduler_fiber_) {
         if (!stopping()) {
-            root_fiber_->call();
+            caller_scheduler_fiber_->resume();
         }
     }
 
@@ -152,8 +162,9 @@ void Scheduler::setThis()
 }
 
 /**
- * @brief 调度器的核心执行函数。它会在调度器的主线程（或调用者线程）中不断循环执行，选择并执行就绪的协程。
- * 
+ * @brief
+ * 调度器的核心执行函数。它会在调度器的主线程（或调用者线程）中不断循环执行，选择并执行就绪的协程。
+ *
  */
 void Scheduler::run()
 {
@@ -165,7 +176,7 @@ void Scheduler::run()
 
     // 如果是在调用者线程中执行，那么t_scheduler_fiber被设置为root_fiber_
     // 否则在这里设置为本线程内的主协程
-    if (hiper::GetThreadId() != root_thread_id_) {
+    if (hiper::GetThreadId() != caller_scheduler_thread_id_) {
         t_scheduler_fiber = Fiber::GetThis().get();
     }
 
@@ -174,8 +185,9 @@ void Scheduler::run()
 
     FiberAndThread ft;
     while (true) {
+        // LOG_DEBUG(g_logger) << "Scheduler Run";
         ft.reset();
-        bool tickle_me = false; // 标记是否需要通知其他线程进行调度
+        bool tickle_me = false;   // 标记是否需要通知其他线程进行调度
         bool is_active = false;
         {
             MutexType::Lock lock(mutex_);
@@ -186,7 +198,7 @@ void Scheduler::run()
                 // 如果一个任务已经指定了运行的线程，并且指定的这个线程不是当前线程，那么跳过这个任务
                 if (it->thread_id != -1 && it->thread_id != hiper::GetThreadId()) {
                     ++it;
-                    tickle_me = true; // 虽然本线程不处理，但是要通知其他线程进行调度
+                    tickle_me = true;   // 虽然本线程不处理，但是要通知其他线程进行调度
                     continue;
                 }
 
@@ -213,18 +225,18 @@ void Scheduler::run()
 
         if (ft.fiber &&
             (ft.fiber->getState() != Fiber::TERM && ft.fiber->getState() != Fiber::EXCEPT)) {
-            ft.fiber->swapIn();
+            ft.fiber->resume();
             --active_thread_count_;
 
             if (ft.fiber->getState() == Fiber::READY) {
-                schedule(ft.fiber); // 将协程放回调度队列
+                schedule(ft.fiber);   // 将协程放回调度队列
             }
 
             // 执行调度后，协程状态不是TERM或EXCEPT，说明协程还没有执行完，需要继续执行
             else if (ft.fiber->getState() != Fiber::TERM && ft.fiber->getState() != Fiber::EXCEPT) {
                 ft.fiber->state_ = Fiber::HOLD;
             }
-            
+
             ft.reset();
         }
 
@@ -236,7 +248,7 @@ void Scheduler::run()
                 cb_fiber.reset(new Fiber(ft.cb));
             }
             ft.reset();
-            cb_fiber->swapIn();
+            cb_fiber->resume();
             --active_thread_count_;
             if (cb_fiber->getState() == Fiber::READY) {
                 schedule(cb_fiber);
@@ -261,7 +273,7 @@ void Scheduler::run()
             }
 
             ++idle_thread_count_;
-            idle_fiber->swapIn();
+            idle_fiber->resume();
             --idle_thread_count_;
             if (idle_fiber->getState() != Fiber::TERM && idle_fiber->getState() != Fiber::EXCEPT) {
                 idle_fiber->state_ = Fiber::HOLD;
@@ -272,7 +284,7 @@ void Scheduler::run()
 
 /**
  * @brief 类似信号量，tickle之后可以唤醒线程，让它们有机会检查 stopping_ 标志并退出循环。
- * 
+ *
  */
 void Scheduler::tickle()
 {
@@ -289,14 +301,15 @@ void Scheduler::idle()
 {
     LOG_INFO(g_logger) << " idle";
     while (!stopping()) {
+        // LOG_INFO(g_logger) << " idle yield to hold";
         hiper::Fiber::YieldToHold();
     }
 }
 
 /**
  * @brief 切换当前协程到另一个线程中执行
- * 
- * @param thread 
+ *
+ * @param thread
  */
 void Scheduler::switchTo(int thread)
 {
