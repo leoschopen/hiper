@@ -1,8 +1,0 @@
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/hiper.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/mutex_test.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/log_test.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/config_test.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/scheduler_test.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/try.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/leo/webserver/hiper/cmake-build-debug/CMakeFiles/rebuild_cache.dir

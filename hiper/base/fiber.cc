@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-09 15:33:13
- * @LastEditTime: 2023-08-28 12:32:55
+ * @LastEditTime: 2023-08-28 15:10:20
  * @Description: fiber implementation
  */
 
@@ -12,14 +12,10 @@
 #include "macro.h"
 #include "scheduler.h"
 
-#include <cstdio>
-#include <mimalloc-2.1/mimalloc.h>
-// #include <mimalloc-2.1/mimalloc-new-delete.h>
-#include "config.h"
-// #include "mimalloc/mimalloc.h"
-
 #include <atomic>
 #include <cstdint>
+#include <cstdio>
+#include <mimalloc-2.1/mimalloc.h>
 #include <sys/types.h>
 #include <ucontext.h>
 
@@ -30,7 +26,7 @@ static Logger::ptr g_logger = LOG_NAME("system");
 static std::atomic<uint64_t> s_fiber_id{0};
 static std::atomic<uint64_t> s_fiber_count{0};
 
-static thread_local Fiber*     t_fiber       = nullptr;
+static thread_local Fiber*     t_fiber             = nullptr;
 static thread_local Fiber::ptr t_thread_main_fiber = nullptr;
 
 static thread_local std::string t_fiber_name = "main";
@@ -157,7 +153,7 @@ void Fiber::swapOut()
     // if (swapcontext(&ctx_, &t_thread_main_fiber->ctx_)) {
     //     HIPER_ASSERT2(false, "swapcontext");
     // }
-    if(swapcontext(&ctx_, &Scheduler::GetMainFiber()->ctx_)) {
+    if (swapcontext(&ctx_, &Scheduler::GetMainFiber()->ctx_)) {
         HIPER_ASSERT2(false, "swapcontext");
     }
 }

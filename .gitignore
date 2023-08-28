@@ -3,6 +3,8 @@
 .xmake
 .git
 
+cmake-build-debug
+
 bin
 
 build
