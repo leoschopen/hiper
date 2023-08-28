@@ -114,7 +114,7 @@ Fiber::~Fiber()
             SetThis(nullptr);
         }
     }
-    LOG_DEBUG(g_logger) << "Fiber::~Fiber id=" << id_ << " total=" << s_fiber_count;
+    LOG_DEBUG(g_logger) << "Fiber::~Fiber id=" << id_ << " total = " << s_fiber_count;
 }
 
 // 重置协程函数，并重置状态，利用已分配的内存继续使用
