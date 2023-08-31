@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-29 22:53:14
- * @LastEditTime: 2023-08-23 16:52:40
+ * @LastEditTime: 2023-08-30 17:01:50
  * @Description: utils
  */
 
@@ -32,6 +32,11 @@ pid_t GetThreadId()
     return syscall(SYS_gettid);
 }
 
+/**
+ * @brief 真正意义的开机后的单调时间，不受NTP的修改
+ * 
+ * @return uint64_t 
+ */
 uint64_t GetElapsedMS() {
     struct timespec ts = {0};
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);

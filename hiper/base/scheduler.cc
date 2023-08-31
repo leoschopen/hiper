@@ -119,10 +119,9 @@ void Scheduler::stop()
 
     // caller_scheduler_thread_id_ 标识调度器是否是在调用者线程中执行还是创建的额外的线程中执行
 
-    // TODO: 如何理解
 
     // 调度器如果是在caller线程中创建的话，只有caller线程才能stop
-    // 调度器在额外线程中创建，并不是当前线程的调度器，所以不能stop
+    // 调度器在额外线程中创建，在caller线程中stop，getThis()返回的是nullptr
     if (caller_scheduler_thread_id_ != -1) {
         HIPER_ASSERT(GetThis() == this);
     }
@@ -188,7 +187,7 @@ void Scheduler::run()
         // LOG_DEBUG(g_logger) << "Scheduler Run";
         ft.reset();
         bool tickle_me = false;   // 标记是否需要通知其他线程进行调度
-        bool is_active = false;
+        bool is_active = false;   // 标记是否有协程被调度
         {
             MutexType::Lock lock(mutex_);
             auto            it = fibers_.begin();
@@ -216,6 +215,7 @@ void Scheduler::run()
                 is_active = true;
                 break;
             }
+            // 判断是否需要通知其他线程进行调度
             tickle_me |= it != fibers_.end();
         }
 
@@ -263,15 +263,15 @@ void Scheduler::run()
             }
         }
         else {
+            
             if (is_active) {
                 --active_thread_count_;
                 continue;
             }
             if (idle_fiber->getState() == Fiber::TERM) {
-                LOG_INFO(g_logger) << " idle fiber term";
+                LOG_INFO(g_logger) << " idle fiber (" << idle_fiber->getId() <<") term";
                 break;
             }
-
             ++idle_thread_count_;
             idle_fiber->resume();
             --idle_thread_count_;
