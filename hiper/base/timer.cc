@@ -176,7 +176,9 @@ uint64_t TimerManger::getNextTimer()
         return ~0ull;
     }
     const Timer::ptr& next = *timers_.begin();
-    uint64_t          now  = hiper::GetElapsedMS();
+
+    uint64_t now = hiper::GetElapsedMS();
+
     if (now >= next->expiration_) {
         return 0;
     }

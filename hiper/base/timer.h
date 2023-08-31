@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-29 20:33:43
- * @LastEditTime: 2023-08-30 22:00:05
+ * @LastEditTime: 2023-08-31 20:25:54
  * @Description: 基于epoll超时实现定时器功能，精度毫秒级，支持在指定超时时间结束之后执行回调函数。
  */
 #ifndef HIPER_TIMER_H
@@ -68,7 +68,7 @@ public:
     /**
      * @brief 到最近一个定时器执行的时间间隔(毫秒)
      *
-     * @return uint64_t
+     * @return uint64_t 0为已经到期，否则返回还有多久到期
      */
     uint64_t getNextTimer();
     
