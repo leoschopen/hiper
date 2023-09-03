@@ -33,15 +33,15 @@ class ConfigVar {
 public:
     typedef std::shared_ptr<ConfigVar> ptr;
     ConfigVar(const T& default_val)
-        : m_val(default_val)
+        : val_(default_val)
     {}
 
-    string   toString() { return ToStr()(m_val); }
-    void     fromString(const string& str) { m_val = FromStr()(str); }
-    const T& getValue() const { return m_val; }
+    string   toString() { return ToStr()(val_); }
+    void     fromString(const string& str) { val_ = FromStr()(str); }
+    const T& getValue() const { return val_; }
 
 private:
-    T m_val;
+    T val_;
 };
 
 int main() {

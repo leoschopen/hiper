@@ -243,6 +243,7 @@ int nanosleep(const struct timespec* req, struct timespec* rem)
     return 0;
 }
 
+// 使用socket获得到fd之后将其加入fdmanager的管理
 int socket(int domain, int type, int protocol)
 {
     if (!hiper::t_hook_enable) {
@@ -322,6 +323,7 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
         LOG_ERROR(g_logger) << "connect addEvent(" << fd << ", WRITE) error";
     }
 
+    // 检查连接结果
     int       error = 0;
     socklen_t len   = sizeof(int);
     if (-1 == getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &len)) {
@@ -429,11 +431,21 @@ int close(int fd)
     return close_old(fd);
 }
 
+
+// fcntl是用来修改已经打开文件的属性的函数
+/*
+ * fcntl function has these cmd arguments:
+ * F_DUPFD、F_DUPFD_CLOEXEC : dup file descriptor
+ * F_GETFD、F_SETFD : set file FD_CLOEXEC flag 当进程执行exec系统调用后此文件描述符会被自动关闭
+ * F_GETFL、F_SETFL: file open flags 一般常用来设置做非阻塞读写操作
+ * F_GETLK、F_SETLK、F_SETLKW : file lock 设置记录锁功能
+ */
 int fcntl(int fd, int cmd, ... /* arg */)
 {
     va_list va;
     va_start(va, cmd);
     switch (cmd) {
+    // 设置文件状态标志
     case F_SETFL:
     {
         int arg = va_arg(va, int);
@@ -454,11 +466,14 @@ int fcntl(int fd, int cmd, ... /* arg */)
     case F_GETFL:
     {
         va_end(va);
-        int               arg = fcntl_old(fd, cmd);
+        int arg = fcntl_old(fd, cmd);
+
         hiper::FdCtx::ptr ctx = hiper::FdMgr::GetInstance()->get(fd);
+        // 避免对非套接字类型的文件描述符进行额外处理
         if (!ctx || ctx->isClose() || !ctx->isSocket()) {
             return arg;
         }
+        // 根据用户的意图来保留或排除该标志位
         if (ctx->getUserNonblock()) {
             return arg | O_NONBLOCK;
         }
@@ -511,6 +526,7 @@ int fcntl(int fd, int cmd, ... /* arg */)
     }
 }
 
+// 与设备进行交互和通信
 int ioctl(int d, unsigned long int request, ...)
 {
     va_list va;
@@ -518,9 +534,11 @@ int ioctl(int d, unsigned long int request, ...)
     void* arg = va_arg(va, void*);
     va_end(va);
 
+    // 设置套接字为非阻塞模式
     if (FIONBIO == request) {
-        bool              user_nonblock = !!*(int*)arg;
-        hiper::FdCtx::ptr ctx           = hiper::FdMgr::GetInstance()->get(d);
+        bool user_nonblock = !!*(int*)arg;
+
+        hiper::FdCtx::ptr ctx = hiper::FdMgr::GetInstance()->get(d);
         if (!ctx || ctx->isClose() || !ctx->isSocket()) {
             return ioctl_old(d, request, arg);
         }
@@ -534,12 +552,15 @@ int getsockopt(int sockfd, int level, int optname, void* optval, socklen_t* optl
     return getsockopt_old(sockfd, level, optname, optval, optlen);
 }
 
+// 设置套接字选项
 int setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen)
 {
     if (!hiper::t_hook_enable) {
         return setsockopt_old(sockfd, level, optname, optval, optlen);
     }
+    // 通用套接字
     if (level == SOL_SOCKET) {
+        // 设置收发超时时间
         if (optname == SO_RCVTIMEO || optname == SO_SNDTIMEO) {
             hiper::FdCtx::ptr ctx = hiper::FdMgr::GetInstance()->get(sockfd);
             if (ctx) {
