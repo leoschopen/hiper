@@ -1,7 +1,7 @@
 #include "scheduler.h"
 
-#include "hiper.h"
 #include "log.h"
+#include "macro.h"
 
 namespace hiper {
 

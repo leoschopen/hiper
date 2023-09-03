@@ -1,6 +1,5 @@
 #include "iomanager.h"
 
-#include "hiper.h"
 #include "log.h"
 #include "macro.h"
 #include "scheduler.h"
@@ -14,6 +13,54 @@
 namespace hiper {
 
 static hiper::Logger::ptr g_logger = LOG_NAME("system");
+
+enum EpollCtlOp
+{
+};
+
+static std::ostream& operator<<(std::ostream& os, const EpollCtlOp& op)
+{
+    switch ((int)op) {
+#define XX(ctl) \
+    case ctl: return os << #ctl;
+        XX(EPOLL_CTL_ADD);
+        XX(EPOLL_CTL_MOD);
+        XX(EPOLL_CTL_DEL);
+    default: return os << (int)op;
+    }
+#undef XX
+}
+
+static std::ostream& operator<<(std::ostream& os, EPOLL_EVENTS events)
+{
+    if (!events) {
+        return os << "0";
+    }
+    bool first = true;
+#define XX(E)          \
+    if (events & E) {  \
+        if (!first) {  \
+            os << "|"; \
+        }              \
+        os << #E;      \
+        first = false; \
+    }
+    XX(EPOLLIN);
+    XX(EPOLLPRI);
+    XX(EPOLLOUT);
+    XX(EPOLLRDNORM);
+    XX(EPOLLRDBAND);
+    XX(EPOLLWRNORM);
+    XX(EPOLLWRBAND);
+    XX(EPOLLMSG);
+    XX(EPOLLERR);
+    XX(EPOLLHUP);
+    XX(EPOLLRDHUP);
+    XX(EPOLLONESHOT);
+    XX(EPOLLET);
+#undef XX
+    return os;
+}
 
 IOManager::FdContext::EventContext& IOManager::FdContext::getContext(Event event)
 {
@@ -33,6 +80,7 @@ void IOManager::FdContext::resetContext(EventContext& ctx)
     ctx.cb = nullptr;
 }
 
+// 避免重复触发同一个事件
 void IOManager::FdContext::triggerEvent(IOManager::Event event)
 {
     HIPER_ASSERT(events & event);        // 事件应该已经包含在events中
@@ -119,8 +167,8 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> cb)
 
     int ret = epoll_ctl(epoll_fd_, op, fd, &epevent);
     if (ret) {
-        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << op << ", " << fd << ", "
-                            << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
+        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << (EpollCtlOp)op << ", " << fd
+                            << ", " << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
                             << ") (" << strerror(errno)
                             << ") fd_ctx->events=" << (EPOLL_EVENTS)fd_ctx->events;
         return -1;
@@ -171,8 +219,8 @@ bool IOManager::delEvent(int fd, Event event)
 
     int ret = epoll_ctl(epoll_fd_, op, fd, &epevent);
     if (ret) {
-        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << op << ", " << fd << ", "
-                            << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
+        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << (EpollCtlOp)op << ", " << fd
+                            << ", " << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
                             << ") (" << strerror(errno)
                             << ") fd_ctx->events=" << (EPOLL_EVENTS)fd_ctx->events;
         return false;
@@ -216,8 +264,8 @@ bool IOManager::cancelEvent(int fd, Event event)
 
     int ret = epoll_ctl(epoll_fd_, op, fd, &epevent);
     if (ret) {
-        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << op << ", " << fd << ", "
-                            << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
+        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << (EpollCtlOp)op << ", " << fd
+                            << ", " << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
                             << ") (" << strerror(errno)
                             << ") fd_ctx->events=" << (EPOLL_EVENTS)fd_ctx->events;
         return false;
@@ -255,8 +303,8 @@ bool IOManager::cancelAll(int fd)
 
     int ret = epoll_ctl(epoll_fd_, op, fd, &epevent);
     if (ret) {
-        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << op << ", " << fd << ", "
-                            << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
+        LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << (EpollCtlOp)op << ", " << fd
+                            << ", " << (EPOLL_EVENTS)epevent.events << "): " << ret << " (" << errno
                             << ") (" << strerror(errno)
                             << ") fd_ctx->events=" << (EPOLL_EVENTS)fd_ctx->events;
         return false;
@@ -282,7 +330,7 @@ static IOManager* GetThis()
     return dynamic_cast<IOManager*>(Scheduler::GetThis());
 }
 
-
+// tickle的目的是触发阻塞在idle协程中的epoll_wait，让其退出；如果没有idle协程则直接返回
 void IOManager::tickle()
 {
     if (!hasIdleThreads()) {
@@ -298,10 +346,17 @@ bool IOManager::stopping(uint64_t& timeout)
     return timeout == ~0ull && pending_event_count_ == 0 && Scheduler::stopping();
 }
 
+bool IOManager::stopping()
+{
+    uint64_t timeout = 0;
+    return stopping(timeout);
+}
+
+
 void IOManager::idle()
 {
     LOG_DEBUG(g_logger) << "idle";
-    
+
     // 一次epoll_wait最多检测256个就绪事件，如果就绪事件超过了这个数，那么会在下轮epoll_wati继续处理
     const uint64_t MAX_EVNETS = 256;
 
@@ -326,6 +381,8 @@ void IOManager::idle()
             else {
                 next_timeout = MAX_TIMEOUT;
             }
+            // epoll_wait返回前，如果有事件发生，那么会立即返回，否则会等待next_timeout时间
+            // 将发生的事件记录在events数组中
             ret = epoll_wait(epoll_fd_, events, MAX_EVNETS, (int)next_timeout);
             if (ret < 0 && errno == EINTR) {
                 continue;
@@ -334,6 +391,8 @@ void IOManager::idle()
                 break;
             }
         } while (true);
+
+        // 事件发生（或定时器超时）后，先处理定时器事件
 
         std::vector<std::function<void()>> cbs;
         listExpiredCb(cbs);
@@ -345,6 +404,7 @@ void IOManager::idle()
         // 遍历所有发生的事件，根据epoll_event的私有指针找到对应的FdContext，进行事件处理
         for (int i = 0; i < ret; ++i) {
             epoll_event& event = events[i];
+            // 管道中有数据，说明已经退出了epollwait，需要读取数据，清空通知
             if (event.data.fd == tickle_fds_[0]) {
                 uint8_t dummy[256];
                 while (read(tickle_fds_[0], dummy, 256) > 0)
@@ -355,6 +415,7 @@ void IOManager::idle()
             FdContext* fd_ctx = (FdContext*)event.data.ptr;
 
             FdContext::MutexType::Lock lock(fd_ctx->mutex);
+
             /**
              * EPOLLERR: 出错，比如写读端已经关闭的pipe
              * EPOLLHUP: 套接字对端关闭
@@ -363,14 +424,18 @@ void IOManager::idle()
             if (event.events & (EPOLLERR | EPOLLHUP)) {
                 event.events |= EPOLLIN | EPOLLOUT;
             }
+
+            // 通过real_events记录当前fd上发生的事件
             int real_events = NONE;
             if (event.events & EPOLLIN) {
                 real_events |= READ;
             }
+
             if (event.events & EPOLLOUT) {
                 real_events |= WRITE;
             }
 
+            // fd_ctx->events表示当前fd上关心的事件，如果没有关心的事件，那么就不处理
             if ((fd_ctx->events & real_events) == NONE) {
                 continue;
             }
@@ -382,12 +447,14 @@ void IOManager::idle()
 
             int ret2 = epoll_ctl(epoll_fd_, op, fd_ctx->fd, &event);
             if (ret2) {
-                LOG_ERROR(g_logger) << "epoll_ctl(" << epoll_fd_ << ", " << op << ", " << fd_ctx->fd
-                                    << ", " << (EPOLL_EVENTS)event.events << "):" << ret2 << " ("
-                                    << errno << ") (" << strerror(errno) << ")";
+                LOG_ERROR(g_logger)
+                    << "epoll_ctl(" << epoll_fd_ << ", " << (EpollCtlOp)op << ", " << fd_ctx->fd
+                    << ", " << (EPOLL_EVENTS)event.events << "):" << ret2 << " (" << errno << ") ("
+                    << strerror(errno) << ")";
                 continue;
             }
 
+            // 处理已经发生的事件，也就是让调度器调度指定的函数或协程
             if (real_events & READ) {
                 fd_ctx->triggerEvent(READ);
                 --pending_event_count_;

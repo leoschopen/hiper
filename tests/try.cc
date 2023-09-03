@@ -1,33 +1,31 @@
+#include <algorithm>
 #include <cstdio>
 #include <iostream>
 #include <memory>
 #include <string>
-
-class Example {
-public:
-    Example(int value) : data(value) {}
-
-    void printData() {
-        std::cout << "Data: " << data << std::endl;
-    }
-
-private:
-    int data;
-};
-
-std::unique_ptr<Example> createExample(int value) {
-    return std::make_unique<Example>(value);
-}
+#include <vector>
 
 
-int main() {
-    // std::unique_ptr<Example> ptr = createExample(42);
-    // ptr->printData(); // 安全地访问对象
+int main()
+{
+    std::vector<int> vec = {1, 3, 5, 7, 9};
 
-    // char * a = "123";
-    std::string a = "123";
-    auto p1 = std::make_shared<std::string>(a);
-    printf("%s\n", p1->c_str());
+    // lower_bound
+    auto it1 = std::lower_bound(vec.begin(), vec.end(), 5);
+
+    // upper_bound
+    auto it2 = std::upper_bound(vec.begin(), vec.end(), 5);
+
+    // equal_range
+    auto pair = std::equal_range(vec.begin(), vec.end(), 5);
+
+    // binary_search
+    bool exist = std::binary_search(vec.begin(), vec.end(), 5);
+
+    std::cout << "lower_bound: " << *it1 << std::endl;                                 // 5
+    std::cout << "upper_bound: " << *it2 << std::endl;                                 // 7
+    std::cout << "equal_range: " << *pair.first << " " << *pair.second << std::endl;   // 5,7
+    std::cout << "binary_search: " << exist << std::endl;                              // 1
 
     return 0;
 }

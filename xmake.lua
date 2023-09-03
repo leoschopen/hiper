@@ -41,8 +41,8 @@ target("hiper")
     add_headerfiles("hiper/base/**.h")
     add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
     add_syslinks("pthread")
-    add_links("mimalloc", "jemalloc")
-    add_linkdirs("/usr/local/lib")
+    -- add_links("mimalloc", "jemalloc")
+    -- add_linkdirs("/usr/local/lib")
     set_targetdir("$(projectdir)/lib")
 
 
@@ -53,6 +53,7 @@ for _, name in ipairs({"mutex_test",
                         "thread_test", 
                         "allocator_test",
                         "scheduler_test",
+                        "timer_test",
                         "try",
                         "fiber_test"}) do
     target(name)
@@ -60,7 +61,6 @@ for _, name in ipairs({"mutex_test",
     add_files("tests/" .. name .. ".cc")
     add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
     add_deps("hiper")
-    add_syslinks("pthread")
+    add_syslinks("pthread") 
 end
-
 

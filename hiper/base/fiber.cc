@@ -75,8 +75,8 @@ Fiber::Fiber()
  */
 Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool back_to_caller)
     : id_(++s_fiber_id)
-    , cb_(cb)
     , back_to_caller_(back_to_caller)
+    , cb_(cb)
 {
     ++s_fiber_count;
     stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();

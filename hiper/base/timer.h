@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-29 20:33:43
- * @LastEditTime: 2023-08-31 20:25:54
+ * @LastEditTime: 2023-09-01 16:08:02
  * @Description: 基于epoll超时实现定时器功能，精度毫秒级，支持在指定超时时间结束之后执行回调函数。
  */
 #ifndef HIPER_TIMER_H
@@ -11,10 +11,13 @@
 #include "mutex.h"
 
 #include <chrono>
-#include <functional> 
+#include <functional>
 #include <memory>
 #include <netinet/in.h>
 #include <set>
+
+
+namespace hiper {
 
 class TimerManger;
 
@@ -27,9 +30,15 @@ class Timer : public std::enable_shared_from_this<Timer> {
 public:
     typedef std::shared_ptr<Timer> ptr;
 
-    bool cancel();    // 取消定时器
-    bool refresh();   // 刷新定时器的执行时间，改为当前时间+ms
-    bool reset(uint64_t ms, bool from_now);   // 重置定时器时间
+
+    //取消定时器，将定时器从定时器管理队列中删除
+    bool cancel();
+
+    // 刷新定时器的执行时间，改为当前时间+ms
+    bool refresh();   
+
+    // 重置定时器时间，from_now为true时，表示从当前时间开始计算，否则还是按原来的开始时间
+    bool reset(uint64_t ms, bool from_now);   
 
 private:
     Timer(uint64_t ms, TimeoutCallBack cb, bool recurring, TimerManger* manager);
@@ -57,7 +66,7 @@ class TimerManger {
 public:
     typedef hiper::RWMutex RWMutexType;
 
-    TimerManger();
+    TimerManger() = default;
 
     virtual ~TimerManger() = default;
 
@@ -71,10 +80,10 @@ public:
      * @return uint64_t 0为已经到期，否则返回还有多久到期
      */
     uint64_t getNextTimer();
-    
+
     /**
      * @brief 获取需要执行的定时器的回调函数列表
-     * 
+     *
      * @param cbs 存放回调函数的列表
      */
     void listExpiredCb(std::vector<std::function<void()>>& cbs);   // 获取需要执行的定时器回调函数
@@ -86,11 +95,11 @@ protected:
 
     void addTimer(const Timer::ptr& val, RWMutexType::WriteLock& lock);   // 添加定时器
 
-// private:
-//     /**
-//      * @brief 检测服务器时间是否被调后了
-//      */
-//     bool detectClockRollover(uint64_t now); 
+    // private:
+    //     /**
+    //      * @brief 检测服务器时间是否被调后了
+    //      */
+    //     bool detectClockRollover(uint64_t now);
 
 private:
     RWMutexType mtx_;
@@ -99,5 +108,7 @@ private:
 
     bool tickled_ = false;   // 是否触发onTimerInsertedAtFront
 };
+
+}   // namespace hiper
 
 #endif   // HIPER_TIMER_H

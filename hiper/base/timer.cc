@@ -5,10 +5,11 @@
 #include <cstdint>
 #include <sys/types.h>
 
+namespace hiper {
 
 Timer::Timer(uint64_t ms, TimeoutCallBack cb, bool is_recurring, TimerManger* manager)
 {
-    is_recurring_  = is_recurring;
+    is_recurring_  = is_recurring; // 是否循环定时器，超时时间到了之后是否需要重新添加到定时器管理器中
     ms_            = ms;
     cb_            = cb;
     timer_manager_ = manager;
@@ -20,12 +21,7 @@ Timer::Timer(uint64_t expiration)
     expiration_ = expiration;
 }
 
-/**
- * @brief 取消定时器，将定时器从定时器管理队列中删除
- *
- * @return true
- * @return false
- */
+
 bool Timer::cancel()
 {
     TimerManger::RWMutexType::WriteLock lock(timer_manager_->mtx_);
@@ -271,4 +267,6 @@ bool Timer::Comparator::operator()(const Timer::ptr& lhs, const Timer::ptr& rhs)
     }
     // 如果两个定时器触发时间相同，则比较它们在内存中的地址，以保证排序的稳定性。
     return lhs.get() < rhs.get();
+}
+
 }
