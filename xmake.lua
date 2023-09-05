@@ -29,38 +29,29 @@ else
     set_symbols("debug")
     -- 禁用优化
     set_optimize("none")
-    add_cxflags("-g", "-rdynamic" ,"-ggdb")
-    add_ldflags("-rdynamic", "-g", "-O0", "-ggdb")
+    add_cxflags("-g", "-rdynamic", "-ggdb")
+    add_ldflags("-rdynamic", "-g", "-O0", "-ggdb", "-Wall", "-Wextra", "-Werror")
 end
-
 
 -- Define the static library
 target("hiper")
-    set_kind("shared")
-    add_files("hiper/base/**.cc")
-    add_headerfiles("hiper/base/**.h")
-    add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
-    add_syslinks("pthread")
-    -- add_links("mimalloc", "jemalloc")
-    -- add_linkdirs("/usr/local/lib")
-    set_targetdir("$(projectdir)/lib")
-
+set_kind("shared")
+add_files("hiper/base/**.cc")
+add_headerfiles("hiper/base/**.h")
+add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
+add_syslinks("pthread")
+-- add_links("mimalloc", "jemalloc")
+-- add_linkdirs("/usr/local/lib")
+set_targetdir("$(projectdir)/lib")
 
 -- Define the executable targets
-for _, name in ipairs({"mutex_test", 
-                        "log_test", 
-                        "config_test", 
-                        "thread_test", 
-                        "allocator_test",
-                        "scheduler_test",
-                        "timer_test",
-                        "try",
-                        "fiber_test"}) do
+for _, name in ipairs({"mutex_test", "log_test", "config_test", "thread_test", "allocator_test", "scheduler_test",
+                       "timer_test", "hook_test", "try", "fiber_test", "address_test"}) do
     target(name)
     set_kind("binary")
     add_files("tests/" .. name .. ".cc")
     add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
     add_deps("hiper")
-    add_syslinks("pthread") 
+    add_syslinks("pthread")
 end
 

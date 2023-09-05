@@ -1,31 +1,19 @@
-#include <algorithm>
-#include <cstdio>
 #include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
 
-
-int main()
-{
-    std::vector<int> vec = {1, 3, 5, 7, 9};
-
-    // lower_bound
-    auto it1 = std::lower_bound(vec.begin(), vec.end(), 5);
-
-    // upper_bound
-    auto it2 = std::upper_bound(vec.begin(), vec.end(), 5);
-
-    // equal_range
-    auto pair = std::equal_range(vec.begin(), vec.end(), 5);
-
-    // binary_search
-    bool exist = std::binary_search(vec.begin(), vec.end(), 5);
-
-    std::cout << "lower_bound: " << *it1 << std::endl;                                 // 5
-    std::cout << "upper_bound: " << *it2 << std::endl;                                 // 7
-    std::cout << "equal_range: " << *pair.first << " " << *pair.second << std::endl;   // 5,7
-    std::cout << "binary_search: " << exist << std::endl;                              // 1
+int main() {
+#ifdef __BYTE_ORDER__
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        std::cout << "Little Endian" << std::endl;
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        std::cout << "Big Endian" << std::endl;
+    #elif __BYTE_ORDER__ == __ORDER_PDP_ENDIAN__
+        std::cout << "PDP Endian" << std::endl;
+    #else
+        std::cout << "Unknown Endianness" << std::endl;
+    #endif
+#else
+    std::cout << "Endianness detection not supported" << std::endl;
+#endif
 
     return 0;
 }

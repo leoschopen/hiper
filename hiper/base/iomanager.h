@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-29 20:30:37
- * @LastEditTime: 2023-09-01 17:10:32
+ * @LastEditTime: 2023-09-03 17:08:27
  * @Description: IO协程调度器
  */
 
@@ -28,7 +28,7 @@ public:
 private:
     /**
      * @brief socket fd上下文类
-     * 
+     *
      */
     struct FdContext
     {
@@ -43,9 +43,9 @@ private:
 
         /**
          * @brief 返回事件的上下文
-         * 
-         * @param event 
-         * @return EventContext& 
+         *
+         * @param event
+         * @return EventContext&
          */
         EventContext& getContext(Event event);
 
@@ -53,8 +53,8 @@ private:
 
         void triggerEvent(Event event);
 
-        EventContext read_context;            // 读事件
-        EventContext write_context;           // 写事件
+        EventContext read_context;    // 读事件
+        EventContext write_context;   // 写事件
         int          fd     = 0;      // 事件关联的文件描述符
         Event        events = NONE;   // 已经注册的事件
         MutexType    mutex;           // 事件的互斥量
@@ -63,10 +63,10 @@ private:
 public:
     /**
      * @brief IO事件协程调度器构造函数，支持epoll，重载tickle和idle
-     * 
-     * @param threads 
-     * @param use_caller 
-     * @param name 
+     *
+     * @param threads
+     * @param use_caller
+     * @param name
      */
     IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = "");
 
@@ -91,19 +91,19 @@ public:
     static IOManager* GetThis();
 
 protected:
-
     // 通知调度协程
     void tickle() override;
 
     bool stopping() override;
 
     /**
-    * @brief idle协程
-    * @details 对于IO协程调度来说，应阻塞在等待IO事件上，idle退出的时机是epoll_wait返回，对应的操作是tickle或注册的IO事件就绪
-    * 调度器无调度任务时会阻塞idle协程上，对IO调度器而言，idle状态应该关注两件事，一是有没有新的调度任务，对应Schduler::schedule()，
-    * 如果有新的调度任务，那应该立即退出idle状态，并执行对应的任务；二是关注当前注册的所有IO事件有没有触发，如果有触发，那么应该执行
-    * IO事件对应的回调函数
-    */
+     * @brief idle协程
+     * @details
+     * 对于IO协程调度来说，应阻塞在等待IO事件上，idle退出的时机是epoll_wait返回，对应的操作是tickle或注册的IO事件就绪
+     * 调度器无调度任务时会阻塞idle协程上，对IO调度器而言，idle状态应该关注两件事，一是有没有新的调度任务，对应Schduler::schedule()，
+     * 如果有新的调度任务，那应该立即退出idle状态，并执行对应的任务；二是关注当前注册的所有IO事件有没有触发，如果有触发，那么应该执行
+     * IO事件对应的回调函数
+     */
     void idle() override;
 
     void onTimerInsertedAtFront() override;
@@ -131,7 +131,7 @@ private:
     RWMutexType mutex_;
     /**
      * @brief socket事件上下文的容器,依次存放epoll_fd监控的socket事件
-     * 
+     *
      */
     std::vector<FdContext*> fd_contexts_;
 };

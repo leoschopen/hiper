@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <fcntl.h>
 #include <sys/epoll.h>
+#include <typeinfo>
 #include <unistd.h>
 
 namespace hiper {
@@ -110,7 +111,8 @@ IOManager::IOManager(size_t threads, bool use_caller, const std::string& name)
     memset(&event, 0, sizeof(epoll_event));
     event.events  = EPOLLIN | EPOLLET;
     event.data.fd = tickle_fds_[0];
-    ret           = fcntl(tickle_fds_[0], F_SETFL, O_NONBLOCK);
+
+    ret = fcntl(tickle_fds_[0], F_SETFL, O_NONBLOCK);
     HIPER_ASSERT(!ret);
 
     ret = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, tickle_fds_[0], &event);
@@ -175,7 +177,8 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> cb)
     }
 
     ++pending_event_count_;
-    fd_ctx->events                     = (Event)(fd_ctx->events | event);
+    fd_ctx->events = (Event)(fd_ctx->events | event);
+
     FdContext::EventContext& event_ctx = fd_ctx->getContext(event);
     HIPER_ASSERT(!event_ctx.scheduler && !event_ctx.fiber && !event_ctx.cb);
 
@@ -325,10 +328,11 @@ bool IOManager::cancelAll(int fd)
     return true;
 }
 
-static IOManager* GetThis()
+IOManager* IOManager::GetThis()
 {
     return dynamic_cast<IOManager*>(Scheduler::GetThis());
 }
+
 
 // tickle的目的是触发阻塞在idle协程中的epoll_wait，让其退出；如果没有idle协程则直接返回
 void IOManager::tickle()

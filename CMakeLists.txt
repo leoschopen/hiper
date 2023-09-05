@@ -62,6 +62,9 @@ target_link_libraries(scheduler_test hiper "${LIB_LIST}")
 add_executable(timer_test "tests/timer_test.cc")
 target_link_libraries(timer_test hiper "${LIB_LIST}")
 
+add_executable(hook_test "tests/hook_test.cc")
+target_link_libraries(hook_test hiper "${LIB_LIST}")
+
 add_executable(try "tests/try.cc")
 target_link_libraries(try hiper "${LIB_LIST}")
 
