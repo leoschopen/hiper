@@ -15,6 +15,7 @@
 #include "noncopyable.h"
 #include "scheduler.h"
 #include "singleton.h"
+#include "socket.h"
 #include "thread.h"
 #include "timer.h"
 #include "util.h"

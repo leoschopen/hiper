@@ -505,29 +505,29 @@ UnixAddress::UnixAddress()
 {
     memset(&addr_, 0, sizeof(addr_));
     addr_.sun_family = AF_UNIX;
-    m_length         = offsetof(sockaddr_un, sun_path) + MAX_PATH_LEN;
+    length_         = offsetof(sockaddr_un, sun_path) + MAX_PATH_LEN;
 }
 
 UnixAddress::UnixAddress(const std::string& path)
 {
     memset(&addr_, 0, sizeof(addr_));
     addr_.sun_family = AF_UNIX;
-    m_length         = path.size() + 1;
+    length_         = path.size() + 1;
 
     if (!path.empty() && path[0] == '\0') {
-        --m_length;
+        --length_;
     }
 
-    if (m_length > sizeof(addr_.sun_path)) {
+    if (length_ > sizeof(addr_.sun_path)) {
         throw std::logic_error("path too long");
     }
-    memcpy(addr_.sun_path, path.c_str(), m_length);
-    m_length += offsetof(sockaddr_un, sun_path);
+    memcpy(addr_.sun_path, path.c_str(), length_);
+    length_ += offsetof(sockaddr_un, sun_path);
 }
 
 void UnixAddress::setAddrLen(uint32_t v)
 {
-    m_length = v;
+    length_ = v;
 }
 
 sockaddr* UnixAddress::getAddr()
@@ -542,15 +542,15 @@ const sockaddr* UnixAddress::getAddr() const
 
 socklen_t UnixAddress::getAddrLen() const
 {
-    return m_length;
+    return length_;
 }
 
 std::string UnixAddress::getPath() const
 {
     std::stringstream ss;
-    if (m_length > offsetof(sockaddr_un, sun_path) && addr_.sun_path[0] == '\0') {
+    if (length_ > offsetof(sockaddr_un, sun_path) && addr_.sun_path[0] == '\0') {
         ss << "\\0"
-           << std::string(addr_.sun_path + 1, m_length - offsetof(sockaddr_un, sun_path) - 1);
+           << std::string(addr_.sun_path + 1, length_ - offsetof(sockaddr_un, sun_path) - 1);
     }
     else {
         ss << addr_.sun_path;
@@ -560,10 +560,10 @@ std::string UnixAddress::getPath() const
 
 std::ostream& UnixAddress::insert(std::ostream& os) const
 {
-    if (m_length > offsetof(sockaddr_un, sun_path) && addr_.sun_path[0] == '\0') {
+    if (length_ > offsetof(sockaddr_un, sun_path) && addr_.sun_path[0] == '\0') {
         return os << "\\0"
                   << std::string(addr_.sun_path + 1,
-                                 m_length - offsetof(sockaddr_un, sun_path) - 1);
+                                 length_ - offsetof(sockaddr_un, sun_path) - 1);
     }
     return os << addr_.sun_path;
 }

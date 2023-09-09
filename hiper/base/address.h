@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-09-05 09:48:41
- * @LastEditTime: 2023-09-05 17:47:08
+ * @LastEditTime: 2023-09-09 10:40:52
  * @Description: 网络地址的封装(IPv4,IPv6,Unix)
  */
 
@@ -207,6 +207,7 @@ private:
 
 /**
  * @brief UnixSocket地址
+ * 地址是一个socket类型的文件在文件系统中的路径,如 /var/tmp/5000.sock
  */
 class UnixAddress : public Address {
 public:
@@ -231,7 +232,7 @@ public:
     std::ostream& insert(std::ostream& os) const override;
 private:
     sockaddr_un addr_;
-    socklen_t m_length;
+    socklen_t length_;
 };
 
 /**
