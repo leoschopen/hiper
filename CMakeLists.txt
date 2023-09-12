@@ -28,17 +28,22 @@ if(Boost_FOUND)
 endif()
 
 set(LIB_SRC
-        hiper/base/thread.cc
-        hiper/base/util.cc
-        hiper/base/mutex.cc
-        hiper/base/log.cc
+        hiper/base/address.cc
+        hiper/base/bytearray.cc
         hiper/base/config.cc
+        hiper/base/endian.hpp
         hiper/base/env.cc
+        hiper/base/fdmanager.cc
         hiper/base/fiber.cc
-        hiper/base/scheduler.cc
-        hiper/base/macro.h
-        hiper/base/timer.cc
+        hiper/base/hook.cc
         hiper/base/iomanager.cc
+        hiper/base/log.cc
+        hiper/base/mutex.cc
+        hiper/base/scheduler.cc
+        hiper/base/socket.cc
+        hiper/base/thread.cc
+        hiper/base/timer.cc
+        hiper/base/util.cc
         )
 
 set(LIB_LIST pthread yaml-cpp mimalloc jemalloc)
@@ -58,6 +63,9 @@ target_link_libraries(config_test hiper "${LIB_LIST}")
 
 add_executable(scheduler_test "tests/scheduler_test.cc")
 target_link_libraries(scheduler_test hiper "${LIB_LIST}")
+
+add_executable(bytearray_test "tests/bytearray_test.cc")
+target_link_libraries(bytearray_test hiper "${LIB_LIST}")
 
 add_executable(timer_test "tests/timer_test.cc")
 target_link_libraries(timer_test hiper "${LIB_LIST}")

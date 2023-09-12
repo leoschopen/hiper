@@ -46,7 +46,7 @@ set_targetdir("$(projectdir)/lib")
 
 -- Define the executable targets
 for _, name in ipairs({"mutex_test", "log_test", "config_test", "thread_test", "allocator_test", "scheduler_test",
-                       "timer_test", "hook_test", "try", "fiber_test", "address_test"}) do
+                       "timer_test", "hook_test", "try", "fiber_test", "address_test", "bytearray_test"}) do
     target(name)
     set_kind("binary")
     add_files("tests/" .. name .. ".cc")

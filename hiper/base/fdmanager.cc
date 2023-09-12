@@ -23,6 +23,7 @@ FdCtx::FdCtx(int fd)
     init();
 }
 
+// 初始化 超时时间、socket类型、是否阻塞等
 bool FdCtx::init()
 {
     if (is_init_) {
@@ -79,7 +80,7 @@ FdManager::FdManager() {
     datas_.resize(64);
 }
 
-FdCtx::ptr FdManager::get(int fd, bool auto_create) {
+FdCtx::ptr FdManager:: get(int fd, bool auto_create) {
     if(fd == -1) {
         return nullptr;
     }
