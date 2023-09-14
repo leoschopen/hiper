@@ -408,6 +408,7 @@ const Address::ptr Socket::getRemoteAddress() {
         break;
     }
     socklen_t addrlen = result->getAddrLen();
+    // 获取与已连接套接字关联的远程（对方）地址信息。
     if (getpeername(sock_, result->getAddr(), &addrlen)) {
         LOG_ERROR(g_logger) << "getpeername error sock=" << sock_
                                   << " errno=" << errno << " errstr=" << strerror(errno);
