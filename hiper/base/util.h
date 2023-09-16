@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-29 22:53:05
- * @LastEditTime: 2023-08-06 10:36:49
+ * @LastEditTime: 2023-09-16 09:12:53
  * @Description: 工具类
  */
 
@@ -29,10 +29,31 @@ uint64_t GetElapsedMS();
 
 uint64_t GetFiberId();
 
-
 std::string GetThreadName();
 
 void SetThreadName(const std::string &name);
+
+
+/**
+ * @brief 字符串转大写
+ */
+std::string ToUpper(const std::string &name);
+
+/**
+ * @brief 字符串转小写
+ */
+std::string ToLower(const std::string &name);
+
+/**
+ * @brief 日期时间转字符串
+ */
+std::string Time2Str(time_t ts = time(0), const std::string &format = "%Y-%m-%d %H:%M:%S");
+
+/**
+ * @brief 字符串转日期时间
+ */
+time_t Str2Time(const char *str, const char *format = "%Y-%m-%d %H:%M:%S");
+
 
 /**
  * @brief 获取T类型的类型字符串
@@ -133,6 +154,72 @@ public:
     static bool OpenForRead(std::ifstream &ifs, const std::string &filename, std::ios_base::openmode mode);
 
     static bool OpenForWrite(std::ofstream &ofs, const std::string &filename, std::ios_base::openmode mode);
+};
+
+
+class StringUtil {
+public:
+    /**
+     * @brief printf风格的字符串格式化，返回格式化后的string
+     */
+    static std::string Format(const char* fmt, ...);
+
+    /**
+     * @brief vprintf风格的字符串格式化，返回格式化后的string
+     */
+    static std::string Formatv(const char* fmt, va_list ap);
+
+    /**
+     * @brief url编码
+     * @param[in] str 原始字符串
+     * @param[in] space_as_plus 是否将空格编码成+号，如果为false，则空格编码成%20
+     * @return 编码后的字符串
+     */
+    static std::string UrlEncode(const std::string& str, bool space_as_plus = true);
+
+    /**
+     * @brief url解码一般来说，URL只能使用英文字母、阿拉伯数字和某些标点符号,有其他的文字和符号将会进行编码后使用
+     * http://zh.wikipedia.org/wiki/%E6%98%A5%E8%8A%82
+     * @param[in] str url字符串
+     * @param[in] space_as_plus 是否将+号解码为空格
+     * @return 解析后的字符串
+     */
+    static std::string UrlDecode(const std::string& str, bool space_as_plus = true);
+
+    /**
+     * @brief 移除字符串首尾的指定字符串
+     * @param[] str 输入字符串
+     * @param[] delimit 待移除的字符串
+     * @return  移除后的字符串
+     */
+    static std::string Trim(const std::string& str, const std::string& delimit = " \t\r\n");
+    
+    /**
+     * @brief 移除字符串首部的指定字符串
+     * @param[] str 输入字符串
+     * @param[] delimit 待移除的字符串
+     * @return  移除后的字符串
+     */
+    static std::string TrimLeft(const std::string& str, const std::string& delimit = " \t\r\n");
+    
+    /**
+     * @brief 移除字符尾部的指定字符串
+     * @param[] str 输入字符串
+     * @param[] delimit 待移除的字符串
+     * @return  移除后的字符串
+     */
+    static std::string TrimRight(const std::string& str, const std::string& delimit = " \t\r\n");
+
+    /**
+     * @brief 宽字符串转字符串
+     */
+    static std::string WStringToString(const std::wstring& ws);
+
+    /**
+     * @brief 字符串转宽字符串
+     */
+    static std::wstring StringToWString(const std::string& s);
+
 };
 
 

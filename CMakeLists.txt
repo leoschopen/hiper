@@ -44,6 +44,8 @@ set(LIB_SRC
         hiper/base/thread.cc
         hiper/base/timer.cc
         hiper/base/util.cc
+        hiper/http/http.cc
+        hiper/http/http_parser.cc
         )
 
 set(LIB_LIST pthread yaml-cpp mimalloc jemalloc)

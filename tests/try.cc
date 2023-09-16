@@ -3,55 +3,49 @@
 #include <memory>
 #include <bitset>
 #include <netinet/in.h>
+#include <sstream>
 #include <type_traits>
 using namespace std;
 
 
-static uint32_t EncodeZigzag32(const int32_t& v)
+std::string UrlDecode(const std::string& str, bool space_as_plus)
 {
-    if (v < 0) {
-        return ((uint32_t)(-v) << 1)  - 1;
+    std::ostringstream decoded;
+    char               decoded_char;
+    int                hex_value;
+
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (str[i] == '%') {
+            if (i + 2 < str.length() && std::isxdigit(str[i + 1]) && std::isxdigit(str[i + 2])) {
+                // Decode a percent-encoded character
+                std::istringstream hex_str(str.substr(i + 1, 2));
+                hex_str >> std::hex >> hex_value;
+                decoded_char = static_cast<char>(hex_value);
+                decoded << decoded_char;
+                i += 2;   // Skip the two hex digits
+            }
+            else {
+                // Malformed percent encoding, just keep the '%' character
+                decoded << '%';
+            }
+        }
+        else if (space_as_plus && str[i] == '+') {
+            // Decode '+' as space if space_as_plus is true
+            decoded << ' ';
+        }
+        else {
+            // Keep the character as is
+            decoded << str[i];
+        }
     }
-    else {
-        return v << 1;
-    }
-}
 
-static int32_t DecodeZigzag32(const uint32_t& v)
-{
-    return (v >> 1) ^ -(v & 1);
-}
-
-// 0000 0000 0000 0000 0000 0000 0101 0011     83
-void writeUint32(uint32_t value)
-{
-    uint8_t tmp[5];
-    uint8_t i = 0;
-    while (value >= 0x80) {
-        tmp[i++] = (value & 0x7F) | 0x80;
-        value >>= 7;
-    }
-    tmp[i++] = value;
-}
-
-
-void writeInt32(int32_t value)
-{
-    writeUint32(EncodeZigzag32(value));
+    return decoded.str();
 }
 
 
 int main() {
-    int32_t originalValue = -42;
-    uint32_t encodedValue = EncodeZigzag32(originalValue);
-    int32_t decodedValue = DecodeZigzag32(encodedValue);
-
-    std::cout << "Original: " << std::bitset<32>(originalValue) << std::endl;
-    std::cout << "Original: " << std::bitset<32>((-originalValue)) << std::endl;
-    std::cout << "Encoded : " << std::bitset<32>(encodedValue) << std::endl;
-    std::cout << "Decoded : " << std::bitset<32>(decodedValue) << std::endl;
-
-    writeInt32(originalValue);
+    std::string str = "http://zh.wikipedia.org/wiki/%E6%98%A5%E8%8A%82";
+    std::cout << UrlDecode(str,true) << std::endl;
 
     return 0;
 }

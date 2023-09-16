@@ -1,6 +1,8 @@
 #ifndef HIPER_HIPER_H
 #define HIPER_HIPER_H
 
+#include "../http/http.h"
+#include "../http/http_parser.h"
 #include "address.h"
 #include "bytearray.h"
 #include "config.h"
