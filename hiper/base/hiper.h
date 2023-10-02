@@ -1,7 +1,13 @@
+/*
+ * @Author: Leo
+ * @Date: 2023-08-02 20:20:25
+ * @Description: 
+ */
 #ifndef HIPER_HIPER_H
 #define HIPER_HIPER_H
 
 #include "../http/http.h"
+#include "../http/http-parser/http_parser.h"
 #include "../http/http_parser.h"
 #include "address.h"
 #include "bytearray.h"

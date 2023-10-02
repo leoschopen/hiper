@@ -48,10 +48,11 @@ void test_config(int argc, char* argv[])
     LOG_INFO(g_logger) << "before " << g_int->toString();
     LOG_INFO(g_logger) << "before " << g_float->toString();
 
-    // YAML::Node config = YAML::LoadFile("/home/leo/webserver/hiper/bin/conf/log.yml");
+    YAML::Node config = YAML::LoadFile("/home/leo/webserver/hiper/hiper/conf/test.yml");
     hiper::EnvMgr::GetInstance()->init(argc, argv);   // 解析命令行参数
-    hiper::Config::LoadFromConfDir(hiper::EnvMgr::GetInstance()->getConfigPath());
-    // hiper::Config::LoadFromYaml(config);
+    // hiper::Config::LoadFromConfDir(hiper::EnvMgr::GetInstance()->getConfigPath());
+    // hiper::Config::LoadFromConfDir("/home/leo/webserver/hiper/hiper/conf/");
+    hiper::Config::LoadFromYaml(config);
 
     LOG_INFO(g_logger) << "after " << g_int->toString();
     LOG_INFO(g_logger) << "after " << g_float->toString();

@@ -1,0 +1,10 @@
+2023-09-24 14:01:56	31349	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//log.yml ok
+2023-09-24 14:01:56	31349	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//server.yml ok
+2023-09-24 14:01:56	31349	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//system.yml ok
+2023-09-24 14:01:56	31349	unnamed	0	[INFO]	[root]	tests/config_test.cc:57	after 8080
+2023-09-24 14:01:56	31349	unnamed	0	[INFO]	[root]	tests/config_test.cc:58	after 15.3999996
+2023-09-24 14:06:59	31763	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//log.yml ok
+2023-09-24 14:06:59	31763	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//server.yml ok
+2023-09-24 14:06:59	31763	unnamed	0	[INFO]	[system]	hiper/base/config.cc:100	LoadConfFile file=/home/leo/webserver/hiper/hiper/conf//system.yml ok
+2023-09-24 14:06:59	31763	unnamed	0	[INFO]	[root]	tests/config_test.cc:57	after 8080
+2023-09-24 14:06:59	31763	unnamed	0	[INFO]	[root]	tests/config_test.cc:58	after 15.3999996

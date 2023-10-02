@@ -1,3 +1,8 @@
+--[[
+Author: Leo
+Date: 2023-08-03 11:59:07
+Description: 
+--]]
 -- xmake.lua
 add_rules("mode.debug", "mode.release") -- xmake f -m debug/release来切换编译模式
 
@@ -48,7 +53,7 @@ target("hiper")
 
 -- Define the executable targets
 for _, name in ipairs({"mutex_test", "log_test", "config_test", "thread_test", "allocator_test", "scheduler_test",
-                       "timer_test", "hook_test", "try", "fiber_test", "address_test", "bytearray_test", "http_test"}) do
+                       "timer_test", "hook_test", "try", "fiber_test", "address_test", "bytearray_test", "http_test", "http_parser_test"}) do
     target(name)
     set_kind("binary")
     add_files("tests/" .. name .. ".cc")
