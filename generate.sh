@@ -19,7 +19,7 @@ namespace=$2
 
 command_error_exit mkdir $project_name
 command_error_exit cd $project_name
-command_error_exit git clone https://github.com/leoschopen/hiper.git
+command_error_exit git clone --single-branch --branch main https://github.com/leoschopen/hiper.git
 command_error_exit cp hiper/xmake.lua .
 command_error_exit cp -rf hiper/conf .
 command_error_exit cd ${namespace}
