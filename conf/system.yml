@@ -1,0 +1,3 @@
+server:
+    work_path: /home/leo/webserver/hiper/chat_room
+    pid_file: chat_room.pid

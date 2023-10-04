@@ -1,6 +1,0 @@
-logs:
-    - name: root
-      level: info
-      appenders:
-          - type: FileLogAppender
-            file: thread.txt
