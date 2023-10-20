@@ -9,6 +9,8 @@
 #include "../http/http.h"
 #include "../http/http-parser/http_parser.h"
 #include "../http/http_parser.h"
+#include "../http/http_session.h"
+#include "../streams/socket_stream.h"
 #include "address.h"
 #include "bytearray.h"
 #include "config.h"

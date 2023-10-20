@@ -1,3 +1,8 @@
+/*
+ * @Author: Leo
+ * @Date: 2023-08-28 14:08:33
+ * @Description: 
+ */
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -5,6 +10,9 @@
 #include <netinet/in.h>
 #include <sstream>
 #include <type_traits>
+
+#include "../hiper/base/hiper.h"
+
 using namespace std;
 
 
@@ -46,6 +54,8 @@ std::string UrlDecode(const std::string& str, bool space_as_plus)
 int main() {
     std::string str = "http://zh.wikipedia.org/wiki/%E6%98%A5%E8%8A%82";
     std::cout << UrlDecode(str,true) << std::endl;
+
+    std::cout << hiper::GetThreadId();
 
     return 0;
 }

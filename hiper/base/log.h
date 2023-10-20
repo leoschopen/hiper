@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-08-04 17:35:08
- * @LastEditTime: 2023-08-04 17:46:58
+ * @LastEditTime: 2023-10-07 21:14:51
  * @Description: 
  */
 
@@ -28,7 +28,7 @@
  */
 #define LOG_LEVEL(logger, level) \
     if(logger->getLevel() <= level) \
-        hiper::LogEventWrap(hiper::LogEvent::ptr(new hiper::LogEvent(logger, level, \
+        hiper::LogEventWrap(logger, hiper::LogEvent::ptr(new hiper::LogEvent(level, \
                         __FILE__, __LINE__, 0, hiper::GetThreadId(),\
                 hiper::GetFiberId(), time(0), hiper::Thread::GetName()))).getSS()
 
@@ -62,7 +62,7 @@
  */
 #define LOG_FMT_LEVEL(logger, level, fmt, ...) \
     if(logger->getLevel() <= level) \
-        hiper::LogEventWrap(hiper::LogEvent::ptr(new hiper::LogEvent(logger, level, \
+        hiper::LogEventWrap(logger, hiper::LogEvent::ptr(new hiper::LogEvent(level, \
                         __FILE__, __LINE__, 0, hiper::GetThreadId(),\
                 hiper::GetFiberId(), time(0), hiper::Thread::GetName()))).getEvent()->format(fmt, __VA_ARGS__)
 
@@ -160,7 +160,12 @@ public:
      * @param[in] time 日志事件(秒)
      * @param[in] thread_name 线程名称
      */
-    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level
+    // LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level
+    //         ,const char* file, int32_t line, uint32_t elapse
+    //         ,uint32_t thread_id, uint32_t fiber_id, uint64_t time
+    //         ,const std::string& thread_name);
+
+    LogEvent(LogLevel::Level level
             ,const char* file, int32_t line, uint32_t elapse
             ,uint32_t thread_id, uint32_t fiber_id, uint64_t time
             ,const std::string& thread_name);
@@ -208,7 +213,7 @@ public:
     /**
      * @brief 返回日志器
      */
-    std::shared_ptr<Logger> getLogger() const { return logger_;}
+    // std::shared_ptr<Logger> getLogger() const { return logger_;}
 
     /**
      * @brief 返回日志级别
@@ -229,6 +234,7 @@ public:
      * @brief 格式化写入日志内容
      */
     void format(const char* fmt, va_list al);
+    
 private:
     /// 文件名
     const char* file_ = nullptr;
@@ -247,7 +253,7 @@ private:
     /// 日志内容流
     std::stringstream ss_;
     /// 日志器
-    std::shared_ptr<Logger> logger_;
+    // std::shared_ptr<Logger> logger_;
     /// 日志等级
     LogLevel::Level level_;
 };
@@ -262,12 +268,14 @@ public:
      * @brief 构造函数
      * @param[in] e 日志事件
      */
-    LogEventWrap(LogEvent::ptr e);
+    LogEventWrap(std::shared_ptr<Logger> logger, LogEvent::ptr e);
 
     /**
      * @brief 析构函数
      */
     ~LogEventWrap();
+
+    std::shared_ptr<Logger> getLogger() const { return logger_;}
 
     /**
      * @brief 获取日志事件
@@ -282,6 +290,7 @@ private:
     /**
      * @brief 日志事件
      */
+    std::shared_ptr<Logger> logger_;
     LogEvent::ptr event_;
 };
 

@@ -1,0 +1,6 @@
+2023-10-07 20:20:28	19731	unnamed	0	[ERROR]	[xx]	tests/log_test.cc:154	l err msg
+2023-10-07 20:20:28	19731	unnamed	0	[INFO]	[xx]	tests/log_test.cc:156	xx logger
+2023-10-07 20:22:55	20737	unnamed	0	[ERROR]	[xx]	tests/log_test.cc:154	l err msg
+2023-10-07 20:22:55	20737	unnamed	0	[INFO]	[xx]	tests/log_test.cc:156	xx logger
+2023-10-07 21:03:04	22692	unnamed	0	[ERROR]	[xx]	tests/log_test.cc:154	l err msg
+2023-10-07 21:03:04	22692	unnamed	0	[INFO]	[xx]	tests/log_test.cc:156	xx logger

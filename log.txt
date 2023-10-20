@@ -1,0 +1,63 @@
+2023-10-07 20:20:28	19731	unnamed	0	[FATAL]	[root]	tests/log_test.cc:126	fatal msg
+2023-10-07 20:20:28	19731	unnamed	0	[ERROR]	[root]	tests/log_test.cc:127	err msg
+2023-10-07 20:20:28	19731	unnamed	0	[INFO]	[root]	tests/log_test.cc:146	logger config:- name: root
+  level: INFO
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+    - type: FileLogAppender
+      file: ./log.txt
+      level: DEBUG
+- name: system
+  level: DEBUG
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+- name: test_logger
+  level: WARN
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+      formatter: "%d:%rms%T%p%T%c%T%f:%l %m%n"
+2023-10-07 20:22:55	20737	unnamed	0	[FATAL]	[root]	tests/log_test.cc:126	fatal msg
+2023-10-07 20:22:55	20737	unnamed	0	[ERROR]	[root]	tests/log_test.cc:127	err msg
+2023-10-07 20:22:55	20737	unnamed	0	[INFO]	[root]	tests/log_test.cc:146	logger config:- name: root
+  level: INFO
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+    - type: FileLogAppender
+      file: ./log.txt
+      level: DEBUG
+- name: system
+  level: DEBUG
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+- name: test_logger
+  level: WARN
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+      formatter: "%d:%rms%T%p%T%c%T%f:%l %m%n"
+2023-10-07 21:03:04	22692	unnamed	0	[FATAL]	[root]	tests/log_test.cc:126	fatal msg
+2023-10-07 21:03:04	22692	unnamed	0	[ERROR]	[root]	tests/log_test.cc:127	err msg
+2023-10-07 21:03:04	22692	unnamed	0	[INFO]	[root]	tests/log_test.cc:146	logger config:- name: root
+  level: INFO
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+    - type: FileLogAppender
+      file: ./log.txt
+      level: DEBUG
+- name: system
+  level: DEBUG
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+- name: test_logger
+  level: WARN
+  formatter: "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"
+  appenders:
+    - type: StdoutLogAppender
+      level: DEBUG
+      formatter: "%d:%rms%T%p%T%c%T%f:%l %m%n"

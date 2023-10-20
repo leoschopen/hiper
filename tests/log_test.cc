@@ -1,7 +1,7 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-30 00:51:07
- * @LastEditTime: 2023-08-06 09:57:34
+ * @LastEditTime: 2023-10-07 20:22:48
  * @Description: 日志类测试
  */
 
@@ -72,7 +72,7 @@ void test_log()
     std::cout << hiper::LoggerMgr::GetInstance()->toYamlString() << std::endl;
 
 
-    YAML::Node root = YAML::LoadFile("/home/leo/webserver/hiper/bin/conf/log.yml");
+    YAML::Node root = YAML::LoadFile("/home/leo/webserver/hiper/conf/log.yml");
     hiper::Config::LoadFromYaml(root);
 
     std::cout << "=============hi" << std::endl;

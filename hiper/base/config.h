@@ -75,7 +75,7 @@ public:
         for (size_t i = 0; i < node.size(); ++i) {
             ss.str("");
             ss << node[i];
-            vec.push_back(LexicalCast<std::string, T>()(ss.str()));
+            vec.push_back(LexicalCast<std::string, T>()(ss.str())); // 类对象函数调用
         }
         return vec;
     }

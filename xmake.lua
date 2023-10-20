@@ -15,7 +15,7 @@ add_includedirs("/usr/local/include/mimalloc-2.1")
 set_targetdir("$(projectdir)/bin")
 
 -- Required packages
-add_requires("boost", "yaml-cpp", "mimalloc", "jemalloc")
+add_requires("boost", "yaml-cpp", "gtest", "mimalloc", "jemalloc")
 
 -- -- 添加链接库
 -- add_links("mimalloc")
@@ -43,9 +43,11 @@ target("hiper")
     set_kind("shared")
     add_files("hiper/base/**.cc")
     add_files("hiper/http/**.cc")
+    add_files("hiper/streams/**.cc")
     add_headerfiles("hiper/base/**.h")
     add_headerfiles("hiper/http/**.h")
-    add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
+    add_headerfiles("hiper/streams/**.h")
+    add_packages("boost", "yaml-cpp", "gtest", "mimalloc", "jemalloc")
     add_syslinks("pthread")
     -- add_links("mimalloc", "jemalloc")
     -- add_linkdirs("/usr/local/lib")
@@ -53,11 +55,11 @@ target("hiper")
 
 -- Define the executable targets
 for _, name in ipairs({"mutex_test", "log_test", "config_test", "thread_test", "allocator_test", "scheduler_test",
-                       "timer_test", "hook_test", "try", "fiber_test", "address_test", "bytearray_test", "http_test", "http_parser_test"}) do
+                       "timer_test", "hook_test", "try", "fiber_test", "address_test", "bytearray_test", "http_test", "http_parser_test", "yaml_test"}) do
     target(name)
     set_kind("binary")
     add_files("tests/" .. name .. ".cc")
-    add_packages("boost", "yaml-cpp", "mimalloc", "jemalloc")
+    add_packages("boost", "yaml-cpp", "gtest", "mimalloc", "jemalloc")
     add_deps("hiper")
     add_syslinks("pthread")
 end
