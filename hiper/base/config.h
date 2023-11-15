@@ -1,34 +1,29 @@
 /*
  * @Author: Leo
  * @Date: 2023-07-30 10:55:23
- * @Description:
+ * @Description: 实现约定优于配置的配置模块，提供配置项的定义
  */
 
 #ifndef HIPER_CONFIG_H
 #define HIPER_CONFIG_H
 
-
+#include <string>
+#include <vector>
+#include <memory>
 #include "log.h"
 #include "mutex.h"
 #include "util.h"
-
-#include <boost/lexical_cast.hpp>
-#include <functional>
-#include <list>
-#include <map>
-#include <memory>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-#include <yaml-cpp/node/node.h>
-#include <yaml-cpp/yaml.h>
+#include "lexicalcast.h"
 
 namespace hiper {
 
 
+/**
+ * @brief 配置参数的虚基类，提供统一的接口
+ * @details 一个配置项包含名称、描述信息
+ *         一个配置项需要提供与字符串的相互转换的toStr、fromStr接口
+ * 
+ */
 class ConfigVarBase {
 public:
     typedef std::shared_ptr<ConfigVarBase> ptr;
@@ -53,208 +48,17 @@ public:
     virtual std::string getTypeName() const = 0;
 
 protected:
-    /// 配置参数的名称
+    // 配置参数的名称
     std::string name_;
-    /// 配置参数的描述
+    // 配置参数的描述
     std::string description_;
 };
 
 
-template<class F, class T> class LexicalCast {
-public:
-    T operator()(const F& v) { return boost::lexical_cast<T>(v); }
-};
 
-template<class T> class LexicalCast<std::string, std::vector<T>> {
-public:
-    std::vector<T> operator()(const std::string& v)
-    {
-        YAML::Node              node = YAML::Load(v);
-        typename std::vector<T> vec;
-        std::stringstream       ss;
-        for (size_t i = 0; i < node.size(); ++i) {
-            ss.str("");
-            ss << node[i];
-            vec.push_back(LexicalCast<std::string, T>()(ss.str())); // 类对象函数调用
-        }
-        return vec;
-    }
-};
-
-template<class T> class LexicalCast<std::vector<T>, std::string> {
-public:
-    std::string operator()(const std::vector<T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Sequence);
-        for (auto& i : v) {
-            node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-template<class T> class LexicalCast<std::string, std::list<T>> {
-public:
-    std::list<T> operator()(const std::string& v)
-    {
-        YAML::Node            node = YAML::Load(v);
-        typename std::list<T> vec;
-        std::stringstream     ss;
-        for (size_t i = 0; i < node.size(); ++i) {
-            ss.str("");
-            ss << node[i];
-            vec.push_back(LexicalCast<std::string, T>()(ss.str()));
-        }
-        return vec;
-    }
-};
-
-template<class T> class LexicalCast<std::list<T>, std::string> {
-public:
-    std::string operator()(const std::list<T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Sequence);
-        for (auto& i : v) {
-            node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-
-template<class T> class LexicalCast<std::string, std::set<T>> {
-public:
-    std::set<T> operator()(const std::string& v)
-    {
-        YAML::Node           node = YAML::Load(v);
-        typename std::set<T> vec;
-        std::stringstream    ss;
-        for (size_t i = 0; i < node.size(); ++i) {
-            ss.str("");
-            ss << node[i];
-            vec.insert(LexicalCast<std::string, T>()(ss.str()));
-        }
-        return vec;
-    }
-};
 
 /**
- * @brief 类型转换模板类片特化(std::set<T> 转换成 YAML String)
- */
-template<class T> class LexicalCast<std::set<T>, std::string> {
-public:
-    std::string operator()(const std::set<T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Sequence);
-        for (auto& i : v) {
-            node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-
-template<class T> class LexicalCast<std::string, std::unordered_set<T>> {
-public:
-    std::unordered_set<T> operator()(const std::string& v)
-    {
-        YAML::Node                     node = YAML::Load(v);
-        typename std::unordered_set<T> vec;
-        std::stringstream              ss;
-        for (size_t i = 0; i < node.size(); ++i) {
-            ss.str("");
-            ss << node[i];
-            vec.insert(LexicalCast<std::string, T>()(ss.str()));
-        }
-        return vec;
-    }
-};
-
-
-template<class T> class LexicalCast<std::unordered_set<T>, std::string> {
-public:
-    std::string operator()(const std::unordered_set<T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Sequence);
-        for (auto& i : v) {
-            node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-
-template<class T> class LexicalCast<std::string, std::map<std::string, T>> {
-public:
-    std::map<std::string, T> operator()(const std::string& v)
-    {
-        YAML::Node                        node = YAML::Load(v);
-        typename std::map<std::string, T> vec;
-        std::stringstream                 ss;
-        for (auto it : node) {
-            ss.str("");
-            ss << it.second;
-            vec.insert(std::make_pair(it.first.Scalar(), LexicalCast<std::string, T>()(ss.str())));
-        }
-        return vec;
-    }
-};
-
-template<class T> class LexicalCast<std::map<std::string, T>, std::string> {
-public:
-    std::string operator()(const std::map<std::string, T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Map);
-        for (auto& i : v) {
-            node[i.first] = YAML::Load(LexicalCast<T, std::string>()(i.second));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-template<class T> class LexicalCast<std::string, std::unordered_map<std::string, T>> {
-public:
-    std::unordered_map<std::string, T> operator()(const std::string& v)
-    {
-        YAML::Node                                  node = YAML::Load(v);
-        typename std::unordered_map<std::string, T> vec;
-        std::stringstream                           ss;
-        for (auto it = node.begin(); it != node.end(); ++it) {
-            ss.str("");
-            ss << it->second;
-            vec.insert(std::make_pair(it->first.Scalar(), LexicalCast<std::string, T>()(ss.str())));
-        }
-        return vec;
-    }
-};
-
-
-template<class T> class LexicalCast<std::unordered_map<std::string, T>, std::string> {
-public:
-    std::string operator()(const std::unordered_map<std::string, T>& v)
-    {
-        YAML::Node node(YAML::NodeType::Map);
-        for (auto& i : v) {
-            node[i.first] = YAML::Load(LexicalCast<T, std::string>()(i.second));
-        }
-        std::stringstream ss;
-        ss << node;
-        return ss.str();
-    }
-};
-
-/**
- * @brief 配置参数模板子类,保存对应类型的参数值
+ * @brief 配置项模板类，可以实现和string互转，使用监听器监听变化，使用map管理监听器
  * @details T 参数的具体类型
  *          FromStr 从std::string转换成T类型的仿函数
  *          ToStr 从T转换成std::string的仿函数
@@ -374,7 +178,13 @@ private:
     std::map<uint64_t, on_change_cb> cbs_;
 };
 
-
+/**
+ * @brief 配置项管理类，提供查询
+ * 使用ConfigVarMap管理（配置项名称，配置项对象）
+ * 1.支持搜索以及使用默认值创建配置项
+ * 2.支持从YAML配置文件加载配置项
+ * 3.支持从目录加载所有配置项
+ */
 class Config {
 public:
     typedef std::unordered_map<std::string, ConfigVarBase::ptr> ConfigVarMap;
@@ -382,6 +192,15 @@ public:
     typedef RWMutex RWMutexType;
 
     template<class T>
+
+    /**
+     * @brief 搜索配置项并返回，不存在将会创建，创建时使用
+     * 
+     * @param name 
+     * @param default_value 
+     * @param description 
+     * @return ConfigVar<T>::ptr 
+     */
     static typename ConfigVar<T>::ptr Lookup(const std::string& name, const T& default_value,
                                              const std::string& description = "")
     {
@@ -389,7 +208,10 @@ public:
 
         auto it = GetDatas().find(name);
         if (it != GetDatas().end()) {
+            // shared_ptr<hiper::ConfigVarBase> -> shared_ptr<hiper::ConfigVar<int>>
+            // 安全向下转型
             auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
+            // auto tmp = it->second;
             if (tmp) {
                 LOG_INFO(LOG_ROOT()) << "Lookup name=" << name << " exists";
                 return tmp;

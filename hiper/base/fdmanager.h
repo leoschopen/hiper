@@ -119,7 +119,7 @@ private:
     std::vector<FdCtx::ptr> datas_;
 };
 
-/// 文件句柄单例
+// 文件句柄单例
 typedef Singleton<FdManager> FdMgr;
 
 }   // namespace sylar

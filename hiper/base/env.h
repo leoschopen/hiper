@@ -76,17 +76,17 @@ public:
     std::string getConfigPath();
 
 private:
-    /// Mutex
+    // Mutex
     RWMutexType mutex_;
-    /// 存储程序的自定义环境变量
+    // 存储程序的自定义环境变量
     std::map<std::string, std::string> args_;
-    /// 存储帮助选项与描述
+    // 存储帮助选项与描述
     std::vector<std::pair<std::string, std::string>> helps_;
-    /// 程序名，也就是argv[0]
+    // 程序名，也就是argv[0]
     std::string program_;
-    /// 程序完整路径名，也就是/proc/$pid/exe软链接指定的路径
+    // 程序完整路径名，也就是/proc/$pid/exe软链接指定的路径
     std::string exe_;
-    /// 当前路径，从argv[0]中获取
+    // 当前路径，从argv[0]中获取
     std::string cwd_;
 };
 

@@ -19,7 +19,7 @@ namespace http {
  */
 class HttpRequestParser {
 public:
-    /// HTTP解析类的智能指针
+    // HTTP解析类的智能指针
     typedef std::shared_ptr<HttpRequestParser> ptr;
 
     /**
@@ -90,15 +90,15 @@ public:
     static uint64_t GetHttpRequestMaxBodySize();
 
 private:
-    /// http_parser
+    // http_parser
     http_parser parser_;
-    /// HttpRequest
+    // HttpRequest
     HttpRequest::ptr data_;
-    /// 错误码，参考http_errno
+    // 错误码，参考http_errno
     int error_;
-    /// 是否解析结束
+    // 是否解析结束
     bool finished_;
-    /// 当前的HTTP头部field，http-parser解析HTTP头部是field和value分两次返回
+    // 当前的HTTP头部field，http-parser解析HTTP头部是field和value分两次返回
     std::string field_;
 };
 
@@ -107,7 +107,7 @@ private:
  */
 class HttpResponseParser {
 public:
-    /// 智能指针类型
+    // 智能指针类型
     typedef std::shared_ptr<HttpResponseParser> ptr;
 
     /**
@@ -177,15 +177,15 @@ public:
     static uint64_t GetHttpResponseMaxBodySize();
 
 private:
-    /// HTTP响应解析器
+    // HTTP响应解析器
     http_parser parser_;
-    /// HTTP响应对象
+    // HTTP响应对象
     HttpResponse::ptr data_;
-    /// 错误码
+    // 错误码
     int error_;
-    /// 是否解析结束
+    // 是否解析结束
     bool finished_;
-    /// 当前的HTTP头部field
+    // 当前的HTTP头部field
     std::string field_;
 };
 

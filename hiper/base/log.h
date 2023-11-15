@@ -115,17 +115,17 @@ public:
      * @brief 日志级别枚举
      */
     enum Level {
-        /// 未知级别
+        // 未知级别
         UNKNOW = 0,
-        /// DEBUG 级别
+        // DEBUG 级别
         DEBUG = 1,
-        /// INFO 级别
+        // INFO 级别
         INFO = 2,
-        /// WARN 级别
+        // WARN 级别
         WARN = 3,
-        /// ERROR 级别
+        // ERROR 级别
         ERROR = 4,
-        /// FATAL 级别
+        // FATAL 级别
         FATAL = 5
     };
 
@@ -236,25 +236,25 @@ public:
     void format(const char* fmt, va_list al);
     
 private:
-    /// 文件名
+    // 文件名
     const char* file_ = nullptr;
-    /// 行号
+    // 行号
     int32_t line_ = 0;
-    /// 程序启动开始到现在的毫秒数
+    // 程序启动开始到现在的毫秒数
     uint32_t elapse_ = 0;
-    /// 线程ID
+    // 线程ID
     uint32_t threadId_ = 0;
-    /// 协程ID
+    // 协程ID
     uint32_t fiberId_ = 0;
-    /// 时间戳
+    // 时间戳
     uint64_t time_ = 0;
-    /// 线程名称
+    // 线程名称
     std::string threadName_;
-    /// 日志内容流
+    // 日志内容流
     std::stringstream ss_;
-    /// 日志器
+    // 日志器
     // std::shared_ptr<Logger> logger_;
-    /// 日志等级
+    // 日志等级
     LogLevel::Level level_;
 };
 
@@ -366,11 +366,11 @@ public:
      */
     const std::string getPattern() const { return pattern_;}
 private:
-    /// 日志格式模板
+    // 日志格式模板
     std::string pattern_;
-    /// 日志格式解析后格式
+    // 日志格式解析后格式
     std::vector<FormatItem::ptr> items_;
-    /// 是否有错误
+    // 是否有错误
     bool error_ = false;
 
 };
@@ -422,13 +422,13 @@ public:
      */
     void setLevel(LogLevel::Level val) { level_ = val;}
 protected:
-    /// 日志级别
+    // 日志级别
     LogLevel::Level level_ = LogLevel::DEBUG;
-    /// 是否有自己的日志格式器
+    // 是否有自己的日志格式器
     bool hasFormatter_ = false;
-    /// Mutex
+    // Mutex
     MutexType mutex_;
-    /// 日志格式器
+    // 日志格式器
     LogFormatter::ptr formatter_;
 };
 
@@ -536,17 +536,17 @@ public:
      */
     std::string toYamlString();
 private:
-    /// 日志名称
+    // 日志名称
     std::string name_;
-    /// 日志级别
+    // 日志级别
     LogLevel::Level level_;
-    /// Mutex
+    // Mutex
     MutexType mutex_;
-    /// 日志目标集合
+    // 日志目标集合
     std::list<LogAppender::ptr> appenders_;
-    /// 日志格式器
+    // 日志格式器
     LogFormatter::ptr formatter_;
-    /// 主日志器
+    // 主日志器
     Logger::ptr root_;
 };
 
@@ -576,11 +576,11 @@ public:
      */
     bool reopen();
 private:
-    /// 文件路径
+    // 文件路径
     std::string filename_;
-    /// 文件流
+    // 文件流
     std::ofstream filestream_;
-    /// 上次重新打开时间
+    // 上次重新打开时间
     uint64_t lastTime_ = 0;
 };
 
@@ -616,15 +616,15 @@ public:
      */
     std::string toYamlString();
 private:
-    /// Mutex
+    // Mutex
     MutexType mutex_;
-    /// 日志器容器
+    // 日志器容器
     std::map<std::string, Logger::ptr> loggers_;
-    /// 主日志器
+    // 主日志器
     Logger::ptr root_;
 };
 
-/// 日志器管理类单例模式
+// 日志器管理类单例模式
 typedef hiper::Singleton<LoggerManager> LoggerMgr;
 
 }

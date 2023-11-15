@@ -130,10 +130,10 @@ class HttpResponse;
  */
 class HttpRequest {
 public:
-    /// HTTP请求的智能指针
+    // HTTP请求的智能指针
     typedef std::shared_ptr<HttpRequest> ptr;
 
-    /// MAP结构
+    // MAP结构
     typedef std::map<std::string, std::string, CaseInsensitiveLess> MapType;
 
     /**
@@ -472,31 +472,31 @@ public:
     void init();
 
 private:
-    /// HTTP方法
+    // HTTP方法
     HttpMethod method_;
-    /// HTTP版本
+    // HTTP版本
     uint8_t version_;
-    /// 是否自动关闭
+    // 是否自动关闭
     bool close_;
-    /// 是否为websocket
+    // 是否为websocket
     bool websocket_;
-    /// 参数解析标志位，0:未解析，1:已解析url参数, 2:已解析http消息体中的参数，4:已解析cookies
+    // 参数解析标志位，0:未解析，1:已解析url参数, 2:已解析http消息体中的参数，4:已解析cookies
     uint8_t parserParamFlag_;
-    /// 请求的完整url
+    // 请求的完整url
     std::string url_;
-    /// 请求路径
+    // 请求路径
     std::string path_;
-    /// 请求参数
+    // 请求参数
     std::string query_;
-    /// 请求fragment
+    // 请求fragment
     std::string fragment_;
-    /// 请求消息体
+    // 请求消息体
     std::string body_;
-    /// 请求头部MAP
+    // 请求头部MAP
     MapType headers_;
-    /// 请求参数MAP
+    // 请求参数MAP
     MapType params_;
-    /// 请求Cookie MAP
+    // 请求Cookie MAP
     MapType cookies_;
 };
 
@@ -505,10 +505,10 @@ private:
  */
 class HttpResponse {
 public:
-    /// HTTP响应结构智能指针
+    // HTTP响应结构智能指针
     typedef std::shared_ptr<HttpResponse> ptr;
 
-    /// MapType
+    // MapType
     typedef std::map<std::string, std::string, CaseInsensitiveLess> MapType;
 
     /**
@@ -681,21 +681,21 @@ public:
                    bool secure = false);
 
 private:
-    /// 响应状态
+    // 响应状态
     HttpStatus status_;
-    /// 版本
+    // 版本
     uint8_t version_;
-    /// 是否自动关闭
+    // 是否自动关闭
     bool close_;
-    /// 是否为websocket
+    // 是否为websocket
     bool websocket_;
-    /// 响应消息体
+    // 响应消息体
     std::string body_;
-    /// 响应原因
+    // 响应原因
     std::string reason_;
-    /// 响应头部MAP
+    // 响应头部MAP
     MapType headers_;
-    /// cookies
+    // cookies
     std::vector<std::string> cookies_;
 };
 

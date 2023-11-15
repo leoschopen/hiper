@@ -12,9 +12,9 @@
 #include <assert.h>
 
 #if defined __GNUC__ || defined __llvm__
-/// LIKELY 宏的封装, 告诉编译器优化,条件大概率成立
+// LIKELY 宏的封装, 告诉编译器优化,条件大概率成立
 #   define HIPER_LIKELY(x)       __builtin_expect(!!(x), 1)
-/// LIKELY 宏的封装, 告诉编译器优化,条件大概率不成立
+// LIKELY 宏的封装, 告诉编译器优化,条件大概率不成立
 #   define HIPER_UNLIKELY(x)     __builtin_expect(!!(x), 0)
 #else
 #   define HIPER_LIKELY(x)      (x)
@@ -22,7 +22,7 @@
 #endif
 
 
-/// 断言宏封装
+// 断言宏封装
 #define HIPER_ASSERT(x) \
     if(HIPER_UNLIKELY(!(x))) { \
         LOG_ERROR(LOG_ROOT()) << "ASSERTION: " #x \
@@ -31,7 +31,7 @@
         assert(x); \
     }
 
-/// 断言宏封装
+// 断言宏封装
 #define HIPER_ASSERT2(x, w) \
     if(HIPER_UNLIKELY(!(x))) { \
         LOG_ERROR(LOG_ROOT()) << "ASSERTION: " #x \

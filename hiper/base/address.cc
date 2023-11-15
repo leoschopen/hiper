@@ -97,8 +97,8 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
     next = results;
     while (next) {
         result.push_back(Create(next->ai_addr, (socklen_t)next->ai_addrlen));
-        /// 一个ip/端口可以对应多种套接字类型，比如SOCK_STREAM, SOCK_DGRAM,
-        /// SOCK_RAW，所以这里会返回重复的结果
+        // 一个ip/端口可以对应多种套接字类型，比如SOCK_STREAM, SOCK_DGRAM,
+        // SOCK_RAW，所以这里会返回重复的结果
         LOG_DEBUG(g_logger) << "family:" << next->ai_family << ", sock type:" << next->ai_socktype;
         next = next->ai_next;
     }
